@@ -1,0 +1,17 @@
+#!/bin/sh
+#
+# $1 = Old group id
+# $2 = New group id
+#
+
+OLDGROUP="$1"
+NEWGROUP="$2"
+
+if [ -z $OLDGROUP ] || [ -z $NEWGROUP ]
+then
+	echo "     Error: Two parameters required in format: OldGroup NewGroup!"
+	return 1
+fi
+
+find . -group $OLDGROUP -exec chgrp $NEWGROUP {} \;
+

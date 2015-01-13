@@ -1,0 +1,70 @@
+#!/bin/sh
+
+mount_path()
+#
+# $1 = Files Server
+# $2 = Remote Path
+# $3 = Local Path
+#
+{
+	SERVER="$1"
+	REMOTEPATH="$2"
+	LOCALPATH="$3"
+	
+	if [ -z "$1" ] || [ -z "$2" ] || [ -z "$3" ]
+	then
+		echo "     ERROR: Missing parameters in call to function mount_path(Server, RemotePath, LocalPath)!"
+		return -1
+	fi
+	
+	./uesp-addfstabentry "$SERVER" "$REMOTEPATH" "$LOCALPATH"
+
+	umount "$LOCALPATH" 2> /dev/null
+	
+	mount $SERVER:$REMOTEPATH "$LOCALPATH" > /dev/null
+	
+	if [ $? != 0 ]
+	then
+		echo "     ERROR: Failed to mount '$LOCALPATH' to '$SERVER:$REMOTEPATH'!"
+		return -2
+	fi
+
+	echo "     OK: Mounted '$LOCALPATH' to '$SERVER:$REMOTEPATH'."
+	return 0
+}
+
+add_host_entry()
+# $1 = IP address to add to allow list
+{
+	./uesp-addhostentry "/etc/hosts.allow" "portmap" "$1"
+	./uesp-addhostentry "/etc/hosts.allow" "statd" "$1"
+	./uesp-addhostentry "/etc/hosts.allow" "lockd" "$1"
+	./uesp-addhostentry "/etc/hosts.allow" "mountd" "$1"
+	./uesp-addhostentry "/etc/hosts.allow" "quotad" "$1"
+	
+	return 0
+}
+
+
+./uesp-update-hosts
+add_host_entry "10.2.212.10" 
+add_host_entry "174.142.196.113" 
+
+/sbin/chkconfig --level 345 portmap on
+/sbin/chkconfig --level 345 nfs on
+/sbin/chkconfig --level 345 nfslock on
+/sbin/chkconfig --level 345 netfs on
+
+/etc/init.d/portmap start
+/etc/init.d/nfs start
+/etc/init.d/nfslock start
+
+mount_path "files1.uesp.net" "/shared/uesp/wikiimages"      "/mnt/uesp/wikiimages"
+mount_path "files1.uesp.net" "/shared/uesp/filecache"       "/mnt/uesp/filecache"
+mount_path "files1.uesp.net" "/shared/phpsessions"          "/mnt/phpsessions"
+mount_path "files1.uesp.net" "/shared/eqwiki/wikiimages"    "/mnt/eqwiki/wikiimages"
+mount_path "files1.uesp.net" "/shared/eqwiki/filecache"    "/mnt/eqwiki/filecache"
+mount_path "files1.uesp.net" "/shared/davewiki/wikiimages"   "/mnt/davewiki/wikiimages"
+mount_path "files1.uesp.net" "/shared/davewiki/filecache"   "/mnt/davewiki/filecache"
+
+

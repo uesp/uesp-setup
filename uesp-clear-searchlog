@@ -1,0 +1,5 @@
+#!/bin/sh
+
+mysql --defaults-extra-file=/home/backup/searchlog-cred.cnf -e'delete from uesp_net_wiki5.searchlog where uesp_net_wiki5.searchlog.searchdate < DATE_SUB(NOW(), INTERVAL 7 DAY);' uesp_net_wiki5;
+
+mysql --defaults-extra-file=/home/backup/searchlog-cred.cnf -e'truncate table uesp_net_wiki5.searchlog_summary;' uesp_net_wiki5;

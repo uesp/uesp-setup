@@ -1,0 +1,103 @@
+#!/bin/sh
+#
+# Format: uesp-mod-ini INPUTFILE VARIABLE NEWVALUE [outputfile]
+# 	$1 = input file
+#	$2 = variable
+#	$3 = new value
+#	$4 = (optional) output file
+#
+
+INPUTFILE=$1
+CFGVAR=$2
+CFGVALUE=$3
+OUTPUTFILE=$4
+
+if [ -z $INPUTFILE ]
+then
+	echo "     ERROR: Missing input file! Format: uesp-mod-ini INPUTFILE VARIABLE NEWVALUE [outputfile]"
+	exit -1
+fi
+
+if [ -z $CFGVAR ]
+then
+	echo "     ERROR: Missing configuration variable to modify! Format: uesp-mod-ini INPUTFILE VARIABLE NEWVALUE [outputfile]"
+	exit -2
+fi
+
+if [ -z $CFGVALUE ]
+then
+	echo "     ERROR: Missing new value of configuration variable! Format: uesp-mod-ini INPUTFILE VARIABLE NEWVALUE [outputfile]"
+	exit -3
+fi
+
+if [ ! -f $INPUTFILE ]
+then
+	echo "     ERROR: Input file '$INPUTFILE' not found!"
+	exit -4
+fi
+
+RESULT=`egrep -c "^[ ^I]*$CFGVAR[ ^I]*=[ ^I]*[\"].*[\"]" $INPUTFILE`
+
+if [ $RESULT -eq 0 ]
+then
+	
+	if [ -z $OUTPUTFILE ]
+	then
+		BACKUPFILE="$INPUTFILE.backup"
+	
+		if [ ! -f $BACKUPFILE ]
+		then
+			cp -f "$INPUTFILE" "$BACKUPFILE"
+		fi
+		
+		echo -e "\n$CFGVAR = \"$CFGVALUE\"\n" >> $INPUTFILE
+		
+		echo "     OK: Added '$CFGVAR = \"$CFGVALUE\"' to the end of '$INPUTFILE'."
+	else
+		cp -f "$INPUTFILE" "$OUTPUTFILE"
+		
+		echo -e "\n$CFGVAR = \"$CFGVALUE\"\n" >> $OUTPUTFILE
+	
+		echo "     OK: Added '$CFGVAR = \"$CFGVALUE\"' to the end of '$OUTPUTFILE'."
+	fi
+	
+	exit 0
+fi
+
+if [ $RESULT -gt 1 ]
+then
+	echo "     ERROR: More than one variable '$CFGVAR' found in '$INPUTFILE'!"
+	exit -6
+fi
+
+if [ -z $OUTPUTFILE ]
+then
+	BACKUPFILE="$INPUTFILE.backup"
+	
+	if [ ! -f $BACKUPFILE ]
+	then
+		cp -f "$INPUTFILE" "$BACKUPFILE"
+	fi
+	
+	sed -i "s:\(^[ ^I]*$CFGVAR[ ^I]*=[ ^I]*[\"]\).*[\"]:\1$CFGVALUE\":" $INPUTFILE
+	RESULT=$?
+else
+	sed "s:\(^[ ^I]*$CFGVAR[ ^I]*=[ ^I]*[\"]\).*[\"]:\1$CFGVALUE\":" $INPUTFILE > $OUTPUTFILE
+	RESULT=$?
+fi
+
+if [ $RESULT != 0 ]
+then
+	echo "     ERROR: Failed to modify variable '$CFGVAR' in file '$INPUTFILE'!"
+	exit -7
+fi
+
+if [ -z $OUTPUTFILE ]
+then
+	echo "     OK: Changed '$CFGVAR' to '$CFGVALUE' in '$INPUTFILE'."
+else
+	echo "     OK: Changed '$CFGVAR' to '$CFGVALUE' in '$INPUTFILE' and saved to '$OUTPUTFILE'."
+fi
+
+exit 0
+

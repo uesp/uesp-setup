@@ -1,0 +1,80 @@
+#!/bin/sh
+
+echo "Starting uesp-update-path..."
+
+modify_path()
+# $1 = bash profile file to modify
+# $2 = Path to add to PATH
+{
+	if [ -z "$1" ] || [ -z "$2" ]
+	then
+		echo "     ERROR: Missing parameters in call to function modify_path(filename, newpath)!"
+		return -1
+	fi
+	
+	BASHPROFILE="$1"
+	NEWPATH="$2"
+	
+	if [ ! -f "$BASHPROFILE" ]
+	then
+		echo "     ERROR: File '$BASHPROFILE' not found!"
+		return -2
+	fi
+	
+	RESULT=`egrep "^PATH=.*" $BASHPROFILE`
+	
+	if [ -z "$RESULT" ]
+	then
+		echo -e "\nPATH=$PATH:$NEWPATH" >> "$BASHPROFILE"
+		RESULT=$?
+		
+		if [ -z "$RESULT" ]
+		then
+			echo "     ERROR: Failed to add PATH to file '$BASHPROFILE'!"
+			return -3
+		fi
+		
+		echo "     OK: Added PATH to end of file '$BASHPROFILE' with new path '$NEWPATH'!"
+		return 0
+	fi
+	
+	RESULT=`echo "$RESULT" | grep -c "$NEWPATH"`
+	
+	if [ "$RESULT" != 0 ]
+	then
+		echo "     OK: Path '$NEWPATH' is already set in file '$BASHPROFILE'!"
+		return 0
+	fi
+	
+	BACKUPFILE="$BASHPROFILE.backup"
+	
+	if [ ! -f "$BACKUPFILE" ]
+	then
+		cp -f "$BASHPROFILE" "$BACKUPFILE"
+	fi
+	
+	sed -i "s:^\([ ^I]*PATH[ ^I]*[=].*\):\1\:$NEWPATH:i" "$BASHPROFILE"
+	RESULT=$?
+	
+	if [ "$RESULT" != 0 ]
+	then
+		echo "     ERROR: Failed to modify the file '$BASHPROFILE'!"
+		return -4
+	fi
+	
+	echo "     OK: Added '$NEWPATH' to the path in '$BASHPROFILE'."
+	return 0
+}
+
+modify_path "/root/.bash_profile" "/sbin"
+modify_path "/root/.bash_profile" "/usr/sbin"
+modify_path "/root/.bash_profile" "/usr/local/sbin"
+
+modify_path "/home/dave/.bash_profile" "/sbin"
+modify_path "/home/dave/.bash_profile" "/usr/sbin"
+modify_path "/home/dave/.bash_profile" "/usr/local/sbin"
+
+modify_path "/home/sshadmin/.bash_profile" "/sbin"
+modify_path "/home/sshadmin/.bash_profile" "/usr/sbin"
+modify_path "/home/sshadmin/.bash_profile" "/usr/local/sbin"
+

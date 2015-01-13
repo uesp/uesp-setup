@@ -1,0 +1,53 @@
+#!/bin/sh
+
+AUTHKEYPATH="/home/uespkey/.ssh"
+AUTHKEYS="/home/uespkey/.ssh/authorized_keys"
+KEYPATH="/etc/uesp-keys/"
+LOCALKEY="local-uesp-key.pub"
+USER="uespkey"
+
+update_from_publickey()
+#
+# $1 = public key file
+#
+{
+	KEYFILE="$1"
+	RESULT=`echo $KEYFILE | egrep "$LOCALKEY"`
+
+	if [ $? == 0 ]
+	then
+		return 1
+	fi
+
+	if [ ! -d $AUTHKEYPATH ]
+	then
+		mkdir $AUTHKEYPATH
+	fi
+
+	if [ ! -f $AUTHKEYS ]
+	then
+		touch $AUTHKEYS
+		chown $USER:$USER $AUTHKEYS
+	fi
+
+	echo "   Checking public key '$KEYFILE'..."
+
+	RESULT=`grep -f $KEYFILE $AUTHKEYS`
+
+	if [ $? == 0 ]
+	then
+		echo "   Key already exists in $AUTHKEYS."
+		return 0
+	fi
+
+	echo "   Adding key to $AUTHKEYS."
+	cat $KEYFILE >> $AUTHKEYS
+
+	return 0
+}
+
+for file in $KEYPATH*.pub
+do
+	update_from_publickey "$file"
+done
+

@@ -1,0 +1,23 @@
+#!/bin/sh
+# $1 = app name
+
+if [ -z $1 ]
+then
+	echo "     ERROR: Missing application name in check_install(app)!"
+	exit -1
+fi
+
+CHECKAPP=`yum -q list installed | egrep ^$1[.]`
+RESULT=$?
+	
+if [ $RESULT != 0 ]
+then
+	echo "          WARNING: Package $1 is NOT installed!"
+	exit 2
+else
+	# echo "     OK: Package '$1' is installed:"
+	# echo "          $CHECKAPP"
+	echo "     OK: $CHECKAPP"
+fi
+	
+exit 0

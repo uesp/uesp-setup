@@ -1,0 +1,38 @@
+#!/bin/sh
+
+OUTPUTPATH="/home/backup/uesp-dumps/current"
+DUMPBACKUP="/home/uesp/www/w/maintenance/dumpBackup_uesp.php"
+NAMESPACES="0,2,6,8,10,14,102,104,106,108,110,112,114,116,118,120,122,124,126,128,130,132,134,136,138,140,142,144,146"
+NOW=$(date +"%Y-%m-%d")
+OUTPUT="$OUTPUTPATH/uespwiki-$NOW-current.xml"
+LOGFILE="/var/log/uespdump.log"
+
+function onerror(){
+	local MSG=$1
+	local RESULT=$2
+
+	echo -e "$MSG\nError Code = $RESULT" | mail -s "Error: XML Dump Failed" dave@uesp.net
+}
+
+echo "Dumping current page XML backup to $OUTPUT..."
+echo "Dumping current page XML backup to $OUTPUT..." >>$LOGFILE
+/usr/bin/time -o $LOGFILE -a -p php $DUMPBACKUP --report=1000 --current --filter=namespace:$NAMESPACES > $OUTPUT 2>>$LOGFILE
+RESULT=$?
+
+if [ $RESULT -ne 0 ]
+then
+	onerror "Failed to dump XML backup!" $RESULT
+	exit 1
+fi
+
+echo "Compressing dump file..." >>$LOGFILE
+/usr/bin/time -o $LOGFILE -a -p bzip2 -f $OUTPUT 2>>$LOGFILE
+RESULT=$?
+
+if [ $RESULT -ne 0 ]
+then
+	onerror "Failed to compress XML backup!" $RESULT
+	exit 1
+fi
+
+echo "Finished!" >>$LOGFILE

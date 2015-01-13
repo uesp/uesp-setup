@@ -1,0 +1,66 @@
+#!/bin/sh
+
+SSHCONF="/etc/ssh/sshd_config"
+
+if [ ! -f "$SSHCONF" ]
+then
+	echo "     ERROR: Missing sshd configuration file '$SSHCONF'!"
+	exit -1
+fi
+
+BACKUPCONF="$SSHCONF.backup"
+
+if [ ! -f $BACKUPCONF ]
+then
+	cp -f $SSHCONF $BACKUPCONF
+fi
+
+RESULT=`egrep -ci "[#]?[ ^I]*TCPKeepAlive[ ^I]+" $SSHCONF`
+
+if [ $RESULT > 0 ]
+then
+
+	sed -i "s:^[ ^I]*[#]*[ ^I]*TCPKeepAlive[ ^I]*.*:TCPKeepAlive yes:i" $SSHCONF
+
+	if [ $? != 0 ]
+	then
+		echo "     ERROR: Failed to update TCPKeepAlive setting in '$SSHCONF'!"
+		exit -2
+	fi
+else
+
+	echo "TCPKeepAlive yes" >> "$SSHCONF"
+
+	if [ $? != 0 ]
+	then
+		echo "     ERROR: Failed to add 'TCPKeepAlive yes' to end of '$SSHCONF'!"
+		exit -3
+	fi
+fi
+
+RESULT=`egrep -ci "[#]?[ ^I]*ClientAliveInterval[ ^I]+" $SSHCONF`
+
+if [ $RESULT > 0 ]
+then
+	sed -i "s:^[ ^I]*[#]*[ ^I]*ClientAliveInterval[ ^I]*.*:ClientAliveInterval 60:i" $SSHCONF
+
+	if [ $? != 0 ]
+	then
+		echo "     ERROR: Failed to update ClientAliveInterval in '$$SHCONF'!"
+		exit -4
+	fi
+else
+
+	echo "ClientAliveInterval 60" >> $SSHCONF
+
+	if [ $? != 0 ]
+	then
+		echo "     ERROR: Failed to add 'ClientAliveInterval' to end of '$SSHCONF'!"
+		exit -5
+	fi
+fi
+
+/etc/init.d/sshd restart
+
+echo "     OK: Updated the sshd configuration."
+exit 0

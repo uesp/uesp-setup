@@ -1,0 +1,58 @@
+#!/bin/sh
+#<server>:</remote/export> </local/directory> <nfs-type> <options> 0 0
+# $1 = Server
+# $2 = Remote path
+# $3 = Local path to mount
+#
+
+SERVER="$1"
+REMOTEPATH="$2"
+LOCALPATH="$3"
+NFSTYPE="nfs"
+NFSOPTIONS="defaults"
+FSTAB="/etc/fstab"
+
+if [ -z "$1" ] || [ -z "$2" ] || [ -z "$3" ]
+then
+	echo "     ERROR: Missing parameter in call to uesp-addfstabentry(Server, RemotePath, LocalPath)!"
+	exit -1
+fi
+
+RESULT=`egrep -ic "^$SERVER:$REMOTEPATH[ ^I]*" "$FSTAB"`
+
+if [ "$RESULT" -gt 0 ]
+then
+	echo "     OK: Entry for '$SERVER:$REMOTEPATH' already exists in '$FSTAB'."
+	exit 0
+fi
+
+echo "$SERVER:$REMOTEPATH $LOCALPATH $NFSTYPE $NFSOPTIONS 0 0" >> "$FSTAB"
+
+if [ $? != 0 ]
+then
+	echo "     ERROR: Failed to add entry for '$SERVER:$REMOTEPATH' to '$FSTAB'!"
+	exit -2
+fi
+
+if [ ! -d "$LOCALPATH" ]
+then
+	mkdir -p "$LOCALPATH"
+	
+	if [ $? != 0 ]
+	then
+		echo "     ERROR: Failed to create local mount directory '$LOCALPATH'!"
+		exit -3
+	fi
+	
+	echo "     OK: Created local mount directory '$LOCALPATH'."
+
+	COPYPATH=`echo "$LOCALPATH" | sed "s:/mnt/:/mntcopy/:"`
+
+	if [ ! -d "$COPYPATH" ]
+	then
+		mkdir -p "$COPYPATH"
+	fi
+fi
+
+echo "     OK: Added entry for '$SERVER:$REMOTEPATH' to '$FSTAB'."
+exit 0

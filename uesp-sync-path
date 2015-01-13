@@ -1,0 +1,25 @@
+#!/bin/sh
+#
+# $1 = host
+# $2 = user
+# $3 = remote path
+# $4 = local path
+#
+
+Host="$1"
+User="$2"
+RemotePath="$3"
+LocalPath="$4"
+
+if [ -z $1 ] || [ -z $2 ] || [ -z $3 ] 
+then
+	echo "    Error: Missing required parameters!"
+	exit 1
+fi
+
+if [ -z $4 ]
+then
+	LocalPath="$RemotePath"
+fi
+
+rsync -avz -e "ssh" $User@$Host:$RemotePath $LocalPath

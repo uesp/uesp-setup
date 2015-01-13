@@ -1,0 +1,81 @@
+#!/bin/sh
+#
+# $1 = UESP hostname
+#
+
+echo "Starting uesp-create-localkey..."
+
+UESPHOST="$1"
+
+KEYPATH="/etc/uesp-keys/"
+LOCALKEY="local-uesp-key.pub"
+
+create_server_key()
+#
+# $1 = UESP hostname
+#
+{
+	KEYFILE="$1-uesp-key"
+	PUBKEYFILE="$KEYFILE.pub"
+
+	ssh-keygen -q -t dsa -b 1024 -f $KEYFILE -C "$1.uesp.net" -N ""
+	RESULT=$?
+	
+	if [ $RESULT != 0 ]
+	then
+		echo "     ERROR: Failed to generate the public/private key pair!"
+		return -1
+	fi
+
+	cp -f $PUBKEYFILE $LOCALKEY
+	RESULT=$?
+	
+	if [ $RESULT != 0 ]
+	then
+		echo "     ERROR: Failed to copy the the public key to '$LOCALKEY'!"
+		return -2
+	fi
+
+	if [ ! -d $KEYPATH ]
+	then
+		mkdir $KEYPATH
+		RESULT=$?
+	
+		if [ $RESULT != 0 ]
+		then
+			echo "     ERROR: Failed to create directory '$KEYPATH'!"
+			return -3
+		fi
+	fi
+
+	HOMEPATH="/home/uespkey/.ssh"
+
+	if [ ! -d "$HOMEPATH" ]
+	then
+		mkdir -p "$HOMEPATH"
+
+		if [ $? != 0 ]
+		then
+			echo "     ERROR: Failed to create directory '$HOMEPATH'!"
+		else
+			chown uespkey:uespkey "$HOMEPATH"
+		fi
+	fi
+
+	cp -f $LOCALKEY $HOMEPATH/id_dsa
+
+	cp -f $PUBKEYFILE $KEYPATH
+	cp -f $LOCALKEY $KEYPATH
+	
+	echo "     OK: Created public/private key pair for host '$1'."
+}
+
+
+if [ -z $UESPHOST ]
+then
+	echo "     ERROR: Empty UESP hostname specified!"
+	exit -1
+fi
+
+create_server_key "$UESPHOST"
+

@@ -1,0 +1,17 @@
+#!/bin/sh
+#
+# $1 = Old user id
+# $2 = New user id
+#
+
+OLDUSER="$1"
+NEWUSER="$2"
+
+if [ -z $OLDUSER ] || [ -z $NEWUSER ]
+then
+	echo "     Error: Two parameters required in format: OldUser NewUser!"
+	return 1
+fi
+
+find . -user $OLDUSER -exec chown $NEWUSER {} \;
+

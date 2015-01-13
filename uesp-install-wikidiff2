@@ -1,0 +1,45 @@
+#!/bin/sh
+
+make --quiet -C ./wikidiff2 2> /dev/null
+RESULT=$?
+
+if [ $RESULT != 0 ]
+then
+	echo "     ERROR: 'make' failed to compile/link WikiDiff2!"
+	exit -1
+fi
+
+make --quiet -C ./wikidiff2 install 2> /dev/null
+RESULT=$?
+
+if [ $RESULT != 0 ]
+then
+	echo "     ERROR: 'make' failed to install WikiDiff2!"
+	exit -2
+fi
+
+if [ ! -f /usr/lib64/php/modules/php_wikidiff2.so ]
+then
+	echo "     ERROR: Failed to install the WikiDiff2 PHP extension!"
+	exit -1
+fi
+
+cp -f ./wikidiff2/php_wikidiff2.ini /etc/php.d
+RESULT=$?
+
+if [ $RESULT !=  0 ] || [ ! -f /etc/php.d/php_wikidiff2.ini ]
+then
+	echo "     ERROR: Failed to copy file 'php_wikidiff2.ini' to '/etc/php.d/'!"
+	exit -3
+fi
+
+RESULT=`php -m | grep -c -i 'wikidiff2'`
+
+if [ $RESULT -eq 0 ]
+then
+	echo "     ERROR: The wikidiff2 PHP extension is does show up in loaded modules!"
+	exit -4
+fi
+
+echo "     OK: WikiDiff2 PHP extension installed!"
+exit 0

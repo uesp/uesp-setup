@@ -1,0 +1,49 @@
+#!/bin/sh
+#
+# <LocalPath>   <Address1>(rw)  <Address2>(rw) ...
+# $1 = Local Path
+# $2 = IP Address to add
+#
+
+LOCALPATH="$1"
+IPADDRESS="$2"
+EXPORTS="/etc/exports"
+
+if [ -z "$1" ] || [ -z "$2" ]
+then
+	echo "     ERROR: Missing parameter in call to uesp-addexportsentry(LocalPath, IPAddress)!"
+	exit -1
+fi
+
+RESULT=`egrep -i "^[ ^I]*$LOCALPATH[ ^I]+.*" "$EXPORTS"`
+
+if [ ! -z "$RESULT" ]
+then
+	COUNT=`echo "$RESULT" | grep -c " $IPADDRESS("`
+
+	if [ $COUNT -gt 0 ]
+	then
+		echo "     OK: Entry for '$LOCALPATH  $IPADDRESS' already exists in '$EXPORTS'."
+		exit 0
+	fi
+else
+
+	echo "$LOCALPATH   " >> "$EXPORTS"
+	
+	if [ $? != 0 ]
+	then
+		echo "     ERROR: Failed to add entry for '$LOCALPATH' to '$EXPORTS'!"
+		exit -1
+	fi
+fi
+
+sed -i "s:^\([ ^I]*$LOCALPATH[ ^I]*.*\)$:\1   $IPADDRESS(rw):i" "$EXPORTS"
+
+if [ $? != 0 ]
+then
+	echo "     ERROR: Failed to add '$IPADDRESS' to entry for '$LOCALPATH' in '$EXPORTS'!"
+	exit -2
+fi
+
+echo "     OK: Added '$IPADDRESS' to entry for '$LOCALPATH' in '$EXPORTS'."
+exit 0

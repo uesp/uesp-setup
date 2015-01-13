@@ -1,0 +1,15 @@
+#!/bin/sh
+
+./uesp-addhostentry "/etc/hosts.allow" "portmap" "127.0.0.1"
+./uesp-addhostentry "/etc/hosts.allow" "statd" "127.0.0.1"
+./uesp-addhostentry "/etc/hosts.allow" "lockd" "127.0.0.1"
+./uesp-addhostentry "/etc/hosts.allow" "mountd" "127.0.0.1"
+./uesp-addhostentry "/etc/hosts.allow" "quotad" "127.0.0.1"
+
+./uesp-addhostentry "/etc/hosts.deny" "portmap" "ALL"
+./uesp-addhostentry "/etc/hosts.deny" "statd" "ALL"
+./uesp-addhostentry "/etc/hosts.deny" "lockd" "ALL"
+./uesp-addhostentry "/etc/hosts.deny" "mountd" "ALL"
+./uesp-addhostentry "/etc/hosts.deny" "quotad" "ALL"
+
+/usr/sbin/exportfs -ar

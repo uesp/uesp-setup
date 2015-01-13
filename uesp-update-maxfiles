@@ -1,0 +1,21 @@
+#!/bin/sh
+
+LIMITSPATH="/etc/security/limits.d/"
+
+if [ ! -d "$LIMITSPATH" ]
+then
+	echo "     ERROR: The path '$LIMITSPATH' does not exist!"
+	exit -1
+fi
+
+cp -f uesp-limits.conf "$LIMITSPATH"
+RESULT=$?
+
+if [ $RESULT != 0 ]
+then
+	echo "     ERROR: Failed to copy 'uesp-limits.conf' to '$LIMITSPATH'!"
+	exit -2
+fi
+
+echo "     OK: Modified the system's maximum open file limit."
+exit 0

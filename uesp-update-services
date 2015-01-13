@@ -1,0 +1,27 @@
+#!/bin/sh
+#
+
+echo "Starting uesp-update-services..."
+
+if [ ! -f "/etc/services.backup" ]
+then
+	cp "/etc/services" "/etc/services.backup"
+	RESULT=$?
+	
+	if [ $RESULT != 0 ]
+	then
+		echo "     ERROR: Failed to backup '/etc/services'!"
+		exit -2
+	fi
+fi
+
+cp -f services.new /etc/services
+RESULT=$?
+	
+if [ $RESULT != 0 ]
+then
+	echo "     ERROR: Failed to copy new version of '/etc/services'!"
+	exit -3
+fi
+
+echo "     OK: Updated '/etc/services'."

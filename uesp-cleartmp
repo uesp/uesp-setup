@@ -1,0 +1,4 @@
+#!/bin/sh
+
+find /tmp/magick*    -mtime +1 -type f -delete
+find /tmp/transform* -mtime +1 -type f -delete

@@ -1,0 +1,28 @@
+#!/bin/sh
+
+MEMCACHEPORT="11000"
+
+allowhost()
+#
+# $1 = host IP
+#
+{
+  HOSTIP="$1"
+
+  /sbin/iptables -A INPUT -m tcp -p tcp -s $HOSTIP --dport $MEMCACHEPORT -j ACCEPT
+}
+
+denyall()
+{
+  /sbin/iptables -A INPUT -m tcp -p tcp --dport 9999 -j DROP
+}
+
+clearall()
+{
+}
+
+clearall
+allowhost "67.205.76.81"
+allowhost "174.142.39.4"
+allowhost "174.142.39.5"
+denyall

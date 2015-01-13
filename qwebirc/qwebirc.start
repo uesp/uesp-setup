@@ -1,0 +1,3 @@
+#!/bin/sh
+
+./run.py -l /var/log/twisted.log

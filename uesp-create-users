@@ -1,0 +1,176 @@
+#!/bin/sh
+
+GROUPADD='/usr/sbin/groupadd'
+USERADD='/usr/sbin/useradd'
+USERMOD='/usr/sbin/usermod'
+
+create_group()
+# $1 = groupname
+# $2 = group id
+{
+
+        if [ -z $1 ] || [ -z $2 ]
+        then
+                echo "     Error: Two parameters required to create_group(group, id)!"
+                return 1
+        fi
+
+        GROUPID=`grep ^$1: /etc/group | awk -F: '{print $3 }'`
+        RESULT=$?
+
+        if [ $RESULT != 0 ] || [ -z $GROUPID ]
+        then
+                RESULT=0
+        elif [ $GROUPID == $2 ]
+        then
+                echo "     OK: Group $1 ($2) already exists...skipping."
+                return 0
+        elif [ $RESULT == 0 ]
+        then
+                echo "     Error: Group $1 ($2) already exists wih a different ID ($GROUPID)!"
+                return 1
+        fi
+
+        $GROUPADD -g $2 $1 2> /dev/null
+        RESULT=$?
+
+        if [ $RESULT == 4 ]
+        then
+                echo "     Error: Group $1 ($2) already exists!"
+                return 1
+        elif [ $RESULT != 0 ]
+        then
+                echo "     Error: Unknown error '$RESULT' attempting to add group $1 ($2)!"
+                return 1
+        else
+                echo "     OK: Created group $1 ($2)."
+        fi
+
+        return 0
+}
+
+create_user()
+# $1 = user/group name
+# $2 = user/group id
+# $3 = (optional) group name
+{
+
+        if [ -z $1 ] || [ -z $2 ]
+        then
+                echo "     Error: Two parameters required to create_user(user, id)!"
+                return 1
+        fi
+
+	if [ -z $3 ]
+	then
+		GROUP=$1
+		create_group $1 $2
+		RESULT=$?
+
+	else
+		GROUP=$3
+	fi
+
+        USERID=`id -u $1 2> /dev/null`
+        RESULT=$?
+
+        if [ $RESULT != 0 ] || [ -z $USERID ]
+        then
+                RESULT=0
+        elif [ $USERID == $2 ]
+        then
+                echo "     OK: User $1 ($2) already exists...skipping."
+                return 0
+        else
+                echo "     Error: User $1 ($2) already exists with a different ID ($USERID)!"
+                return 1
+        fi
+
+        $USERADD $1 -g $GROUP -u $2 2> /dev/null
+        RESULT=$?
+
+        if [ $RESULT == 4 ]
+        then
+                echo "     Error: User ID $2 is already in use. Cannot create user $1!"
+                return 1
+        elif [ $RESULT == 6 ]
+        then
+                echo "     Error: Group $GROUP doesn't exist for user $1 ($2)!"
+                return 1
+        elif [ $RESULT == 9 ]
+        then
+                echo "     Error: User $1 already exists!"
+                return 1
+        elif [ $RESULT != 0 ]
+        then
+                echo "     Error: Unknown error '$RESULT' attempting to add user $1 ($2)!"
+                return 1
+        else
+                echo "     OK: Created user $1 ($2)."
+        fi
+
+        return 0
+}
+
+add_user_to_group()
+# $1 = user
+# $2 = group
+{
+
+        if [ -z $1 ] || [ -z $2 ]
+        then
+                echo "     Error: Two parameters required to add_user_to_group()!"
+                return 1
+        fi
+
+        $USERMOD -a -G $2 $1
+        RESULT=$?
+
+        if [ $RESULT == 6 ]
+        then
+                echo "     Error: The user '$1' or the group '$2' do not exist!"
+                return 1
+        elif [ $RESULT != 0 ]
+        then
+                echo "     Error: Unknown error '$RESULT' returned from usermod!"
+                return 1
+        else
+                echo "     OK: Added the group '$2' to the user '$1'."
+        fi
+
+        return 0
+}
+
+create_group "uespadmin" 522
+create_group "uespforum" 521
+
+create_user "techiweb"    500
+create_user "sshadmin"    501
+create_user "apache"      502
+create_user "mysql"       503
+create_user "backup"      504
+create_user "uesp"        505
+create_user "squid"       506
+create_user "eqwiki"      507
+create_user "dave"        519
+create_user "nephele"     523
+create_user "rpeh"        524
+create_user "blog"        527
+create_user "uespkey"     530
+create_user "dungeonhack" 531
+create_user "ocp"         532
+create_user "zabbix"      535
+create_user "robinhood"   536
+create_user "alfwyn"      537
+create_user "jakatackka"  538
+create_user "egd"         610
+create_user "avron"       700
+create_user "steve"       701
+create_user "viud"        702
+
+add_user_to_group "dave" "uespadmin"
+add_user_to_group "dave" "uesp"
+add_user_to_group "dave" "apache"
+add_user_to_group "dave" "mysql"
+add_user_to_group "dave" "uespforum"
+

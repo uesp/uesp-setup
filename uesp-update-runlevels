@@ -1,0 +1,15 @@
+#!/bin/sh
+#
+
+echo "Starting uesp-update-runlevels..."
+
+/sbin/chkconfig --levels 2345 ntpd on
+RESULT=$?
+
+if [ $RESULT != 0 ]
+then
+	echo "     ERROR: Failed to modify runlevel settings for ntpd!"
+	exit -1
+fi
+
+echo "     OK: Updated runlevel settings for ntpd."

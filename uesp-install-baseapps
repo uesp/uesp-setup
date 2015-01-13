@@ -1,0 +1,22 @@
+#!/bin/sh
+
+echo "Starting uesp-install-baseapps..."
+
+./uesp-yuminstall "at"
+./uesp-yuminstall "vsftpd"
+./uesp-yuminstall "libmcrypt"
+./uesp-yuminstall "libtool-ltdl"
+./uesp-yuminstall "swig"
+./uesp-yuminstall "gcc"
+./uesp-yuminstall "gcc-c++"
+./uesp-yuminstall "ntp"
+./uesp-yuminstall "nfs-utils"
+./uesp-yuminstall "re2c"
+./uesp-yuminstall "curl"
+./uesp-yuminstall "libcurl-devel"
+
+/etc/init.d/atd start
+/etc/init.d/ntpd start
+
+
+

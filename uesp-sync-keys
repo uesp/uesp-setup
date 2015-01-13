@@ -1,0 +1,17 @@
+#!/bin/sh
+#
+# $1 = User (default = uespkey)
+#
+
+KEYUSER="$1"
+
+KEYHOST="content3.uesp.net"
+KEYPATH="/etc/uesp-keys/"
+LOCALKEY="/etc/uesp-keys/local-uesp-key.pub"
+
+if [ -z $KEYUSER ]
+then
+	KEYUSER="uespkey"
+fi
+
+rsync --exclude=local* -avz -e "ssh" $KEYUSER@$KEYHOST:$KEYPATH $KEYPATH

@@ -1,0 +1,122 @@
+#!/bin/sh
+
+KEYPATH="/etc/uesp-keys"
+LOCALHOSTNAME=`hostname`
+
+copy_keys_from()
+# $1 = Remote host name
+{
+	HOST="$1"
+
+	if [ -z $HOST ]
+	then
+		echo "     ERROR: Missing parameter in call to function copy_keys_from(RemoteHost)!"
+		return -1
+	fi
+
+	rsync --exclude=local* -e "ssh" dave@$HOST:$KEYPATH/*.pub $KEYPATH
+
+	if [ $? != 0 ]
+	then
+		echo "     ERROR: Failed to copy public keys from '$HOST:$KEYPATH'!"
+		return -2
+	fi
+
+	echo "     OK: Copied public keys from '$HOST:$KEYPATH'."
+	return 0
+}
+
+copy_keys_to()
+# $1 = Remote host name
+{
+	HOST="$1"
+
+	if [ -z $HOST ]
+	then
+		echo "     ERROR: Missing parameter in call to function copy_keys_to(RemoteHost)!"
+		return -1
+	fi
+
+	rsync --exclude=local* -e ssh $KEYPATH/*.pub dave@$HOST:$KEYPATH/
+
+	if [ $? != 0 ]
+	then
+		echo "     ERROR: Failed to copy public keys to '$HOST:/$KEYPATH'!"
+		return -2
+	fi
+
+	echo "     OK: Copied public keys to '$HOST:$KEYPATH'."
+	return 0	
+}
+
+copy_key_from()
+# $1 = Remote host
+# $2 = UESP host name
+{
+	HOST="$1"
+	HOSTNAME="$2"
+	REMOTEKEYFILE="$KEYPATH/$HOSTNAME-uesp-key.pub"
+
+	if [ -z $HOST ] || [ -z $HOSTNAME ]
+	then
+		echo "     ERROR: Missing parameters in call to function copy_key_from(RemoteHost, HostName)!"
+		return -1
+	fi
+
+	scp dave@$HOST:$REMOTEKEYFILE $KEYPATH
+
+	if [ $? != 0 ]
+	then
+		echo "     ERROR: Failed to copy public host key '$HOST:$REMOTEKEYFILE'!"
+		return -2
+	fi
+
+	echo "     OK: Copied remote public key '$REMOTEKEYFILE'."
+	return 0
+}
+
+copy_key_to()
+# $1 = Remote Host
+{
+	HOST="$1"
+	LOCALKEYFILE="$KEYPATH/local-uesp-key.pub"
+	REMOTEKEYFILE="$KEYPATH/$LOCALHOSTNAME-uesp-key.pub"
+
+	if [ -z $HOST ]
+	then
+		echo "     ERROR: Missing parameter in call to function copy_key_to(RemoteHost)!"
+		return -1
+	fi
+
+	if [ ! -f "$LOCALKEYFILE" ]
+	then
+		echo "     ERROR: Local key file '$KEYFILE' not found!"
+		return -2
+	fi
+
+	scp $LOCALKEYFILE dave@$HOST:$REMOTEKEYFILE
+
+	if [ $? != 0 ]
+	then
+		echo "     ERROR: Failed to copy local key file '$KEYFILE' to remote host '$HOST'!"
+		return -3
+	fi
+
+	echo "     OK: Copied local public key file to '$HOST:$REMOTEKEYFILE'."	
+	return 0
+}
+
+
+copy_key_from "content1.uesp.net" "content1"
+copy_key_from "content2.uesp.net" "content2"
+copy_key_from "content3.uesp.net" "content3"
+copy_key_from "db1.uesp.net"      "db1"
+copy_key_from "files1.uesp.net"   "files1"
+copy_key_from "squid1.uesp.net"   "squid1"
+
+copy_key_to "content1.uesp.net"
+copy_key_to "content2.uesp.net"
+copy_key_to "content3.uesp.net"
+copy_key_to "squid1.uesp.net"
+copy_key_to "files1.uesp.net"
+copy_key_to "db1.uesp.net"

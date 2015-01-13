@@ -1,0 +1,21 @@
+#!/bin/sh
+# $1 = app name
+
+# echo "     Installing package '$1'..."
+
+FINDAPP=`yum -q list $1 2>&1 | grep -c -i "No Matching Package"`
+RESULT=$?
+
+if [ $RESULT -eq 0 ]
+then
+	echo "     ERROR: Package '$1' not found!"
+	exit -1
+fi
+
+INSTALLAPP=`yum -q -y install $1 > /dev/null`
+RESULT=$?
+
+./uesp-checkyuminstall $1
+
+exit 0
+

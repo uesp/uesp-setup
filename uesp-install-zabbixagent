@@ -1,0 +1,101 @@
+#!/bin/sh
+#
+# $1=Zabbix Server IP address
+#
+
+echo "Starting uesp-install-zabbixagent..."
+
+LOGPATH="/var/log/zabbix"
+INSTALLPATH="/usr/local"
+ZABBIXCONF="/etc/zabbix/zabbix_agentd.conf"
+SERVERIP="$1"
+
+if [ -z $SERVERIP ]
+then
+	echo "     ERROR: Missing Zabbix server IP address!"
+	exit -1
+fi
+
+cp -f ./zabbix/bin/* "$INSTALLPATH/bin/"
+RESULT=$?
+
+if [ $RESULT != 0 ]
+then
+	echo "     ERROR: Failed to copy Zabbix agent files into '$INSTALLPATH/bin/'!"
+	exit -2
+fi
+
+cp -f ./zabbix/sbin/* "$INSTALLPATH/sbin/"
+RESULT=$?
+
+if [ $RESULT != 0 ]
+then
+	echo "     ERROR: Failed to copy Zabbix agent files into '$INSTALLPATH/sbin/'!"
+	exit -3
+fi
+
+cp -fR "./zabbix/conf/" "/etc/zabbix/"
+RESULT=$?
+
+if [ $RESULT != 0 ]
+then
+	echo "     ERROR: Failed to copy Zabbix agent files into '/etc/zabbix/'!"
+	exit -4
+fi
+
+sed -i "s:\(^[ ^I]*SERVER[ ^I]*=[ ^I]*[\"]*\).*\([\"]*\):\1\2$SERVERIP\2:i" "$ZABBIXCONF"
+RESULT=$?
+
+if [ $RESULT != 0 ]
+then
+	echo "     ERROR: Failed to modify the SERVER variable in the Zabbix agent configuration!"
+	exit -5
+fi
+
+cp -f ./zabbix/zabbix_agentd.init /etc/init.d/zabbix_agentd
+RESULT=$?
+
+if [ $RESULT != 0 ]
+then
+	echo "     ERROR: Failed to copy the Zabbix agent startup script to '/etc/init.d/'!"
+	exit -6
+fi
+
+/sbin/chkconfig --add zabbix_agentd
+RESULT=$?
+
+if [ $RESULT != 0 ]
+then
+	echo "     ERROR: Failed to add the Zabbix agent startup script using chkconfig!"
+	exit -6
+fi
+
+if [ ! -d "$LOGPATH" ]
+then
+	mkdir /var/log/zabbix
+	RESULT=$?
+	
+	if [ $RESULT != 0 ]
+	then
+		echo "     ERROR: Failed to create the Zabbix log directory '$LOGPATH'!"
+		exit -7
+	fi
+	
+	chown zabbix:zabbix /var/log/zabbix
+fi
+
+pushd . > /dev/null
+cd zabbix-src/man
+make install > /dev/null
+RESULT=$?
+popd > /dev/null
+
+if [ $RESULT != 0 ]
+then
+	echo "     WARNING: Failed to install the zabbix man pages!"
+fi
+
+# Startup automatically
+
+echo "     OK: Successfully installed the Zabbix agent!"
+exit 0

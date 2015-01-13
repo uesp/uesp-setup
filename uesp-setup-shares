@@ -1,0 +1,69 @@
+#!/bin/sh
+
+add_host_entry()
+# $1 = IP address to add to allow list
+{
+	./uesp-addhostentry "/etc/hosts.allow" "portmap" "$1"
+	./uesp-addhostentry "/etc/hosts.allow" "statd" "$1"
+	./uesp-addhostentry "/etc/hosts.allow" "lockd" "$1"
+	./uesp-addhostentry "/etc/hosts.allow" "mountd" "$1"
+	./uesp-addhostentry "/etc/hosts.allow" "quotad" "$1"
+	
+	return 0
+}
+
+add_exports_entry()
+# $1 = IP address to add to exports
+{
+	./uesp-addexportsentry  "/shared/phpsessions"         "$1" 
+	./uesp-addexportsentry  "/shared/uesp/wikiimages"     "$1" 
+	./uesp-addexportsentry  "/shared/uesp/filecache"      "$1" 
+	./uesp-addexportsentry  "/shared/eqwiki/wikiimages"   "$1" 
+	./uesp-addexportsentry  "/shared/eqwiki/filecache"    "$1" 
+	./uesp-addexportsentry  "/shared/davewiki/wikiimages" "$1" 
+	./uesp-addexportsentry  "/shared/davewiki/filecache"  "$1" 
+}
+
+./uesp-update-hosts
+add_host_entry "10.2.212.11"
+add_host_entry "10.2.212.12"
+add_host_entry "10.2.212.14"
+add_host_entry "174.142.196.114"
+add_host_entry "174.142.196.115"
+add_host_entry "174.142.196.117"
+add_host_entry "67.205.76.81"
+add_host_entry "174.142.39.4"
+add_host_entry "174.142.39.5"
+
+add_exports_entry "10.2.212.11"
+add_exports_entry "10.2.212.12"
+add_exports_entry "10.2.212.14"
+add_exports_entry "174.142.196.114"
+add_exports_entry "174.142.196.115"
+add_exports_entry "174.142.196.117"
+add_exports_entry "67.205.76.81"
+add_exports_entry "174.142.39.4"
+add_exports_entry "174.142.39.5"
+/usr/sbin/exportfs -ra
+
+/sbin/chkconfig --level 345 portmap on
+/sbin/chkconfig --level 345 nfs on
+
+/etc/init.d/portmap start
+/etc/init.d/nfs start
+
+mkdir -p /shared/phpsessions
+mkdir -p /shared/uesp/wikiimages
+mkdir -p /shared/uesp/filecache
+mkdir -p /shared/uesp/maps
+mkdir -p /shared/uesp/skins
+
+mkdir -p /shared/davewiki/wikiimages
+mkdir -p /shared/davewiki/filecache
+
+mkdir -p /shared/eqwiki/wikiimages
+mkdir -p /shared/eqwiki/filecache
+
+chown -R apache:apache /shared
+
+

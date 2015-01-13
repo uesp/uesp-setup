@@ -1,0 +1,117 @@
+#!/bin/sh
+
+check_host_entry()
+#
+# $1 = Hosts file to check, e.g. "/etc/hosts.allow"
+# $2 = App to check for
+#
+# returns 1 if the given app already exists in the given file.
+#
+{
+	HOSTFILE="$1"
+	APP="$2"
+
+	if [ -z $HOSTFILE ] || [ -z $APP ]
+	then
+		echo "     ERROR: Missing parameters in call to function check_hosts(HostFile, App)!"
+		return 0
+	fi
+
+	if [ ! -f $HOSTFILE ]
+	then
+		echo "     ERROR: The hosts file '$HOSTFILE' was not found!"
+		return 0	
+	fi
+
+	RESULT=`egrep -c "^[ ^I]*$APP[ ^I]*:" "$HOSTFILE"`
+
+	return $RESULT
+}
+
+
+add_host_entry()
+#
+# Checks the given host file for a particular entry and adds it to the end of the
+# file if it does not already exist.
+#
+# $1 = Host file to modify
+# $2 = daemon name
+# $3 = Entry to add (can be blank)
+#
+# Returns 0 on success and non-zero on any error.
+#
+{
+	HOSTFILE="$1"
+	APP="$2"
+	ENTRY="$3"
+
+	if [ -z $HOSTFILE ] || [ -z $APP ]
+	then
+		echo "     ERROR: Missing parameters in call to function add_host_entry(HostFile, App)!"
+		return -1
+	fi
+
+	check_host_entry "$HOSTFILE" "$APP"
+	RESULT=$?
+
+	if [ "$RESULT" != 0 ]
+	then
+		if [ -z $ENTRY ]
+		then
+			echo "     OK: Entry for '$APP' already exists in '$HOSTFILE'."
+			return 0
+		fi
+
+		ENTRIES=`egrep "^[ ^I]*$APP[ ^I]*:[ ^I]*" "$HOSTFILE"`
+		RESULT=$?
+
+		if [ $RESULT != 0 ]
+		then
+			echo "     ERROR: Failed to parse file '$HOSTFILE' for daemon '$APP'!"
+			return -2
+		fi
+
+		RESULT=`echo "$ENTRIES" | egrep -c "[ ^I]*$ENTRY[ ^I]*"`
+		
+		if [ "$RESULT" != 0 ]
+		then
+			echo "     OK: Entry for '$APP: $ENTRY' already exists in '$HOSTFILE'!"
+			return 0
+		fi
+
+		BACKUPFILE="$HOSTFILE.backup"
+
+		if [ ! -f $BACKUPFILE ]
+		then
+			cp -f $HOSTFILE $BACKUPFILE
+		fi
+
+		sed -i "s:^\([ ^I]*$APP[ ^I]*\:.*\):\1 $ENTRY:" "$HOSTFILE"
+		RESULT=$?
+
+		if [ $RESULT != 0 ]
+		then
+			echo "     ERROR: Failed up add entry '$ENTRY' for '$APP' in '$HOSTFILE'!"
+			return -3
+		fi
+
+		echo "     OK: Added '$ENTRY' to existing '$APP' line in '$HOSTFILE'."
+		return 0
+	fi
+
+	echo -e "$APP: $ENTRY " >> "$HOSTFILE"
+	RESULT=$?
+
+	if [ $RESULT != 0 ]
+	then
+		echo "     ERROR: Failed to modify file '$HOSTFILE'!"
+		return -2
+	fi
+
+	echo "     OK: Added entry '$APP: $ENTRY' to the end of '$HOSTFILE'."
+	return 0
+}
+
+add_host_entry "$1" "$2" "$3"
+
+

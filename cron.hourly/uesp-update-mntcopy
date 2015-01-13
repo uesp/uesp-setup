@@ -1,0 +1,12 @@
+#!/bin/sh
+
+rsync --delete -avz -e "ssh -i /etc/uesp-key/local-uesp-key" uespkey@files1.uesp.net:/shared/phpsessions /mntcopy/phpsessions
+
+rsync --delete -avz -e "ssh -i /etc/uesp-key/local-uesp-key" uespkey@files1.uesp.net:/shared/uesp/wikiimages/ /mntcopy/uesp/wikiimages/
+rsync --delete -avz -e "ssh -i /etc/uesp-key/local-uesp-key" uespkey@files1.uesp.net:/shared/uesp/filecache/ /mntcopy/uesp/filecache/
+
+rsync --delete -avz -e "ssh -i /etc/uesp-key/local-uesp-key" uespkey@files1.uesp.net:/shared/eqwiki/wikiimages/ /mntcopy/eqwiki/wikiimages/
+rsync --delete -avz -e "ssh -i /etc/uesp-key/local-uesp-key" uespkey@files1.uesp.net:/shared/eqwiki/filecache/ /mntcopy/eqwiki/filecache/
+
+rsync --delete -avz -e "ssh -i /etc/uesp-key/local-uesp-key" uespkey@files1.uesp.net:/shared/davewiki/wikiimages/ /mntcopy/davewiki/wikiimages/
+rsync --delete -avz -e "ssh -i /etc/uesp-key/local-uesp-key" uespkey@files1.uesp.net:/shared/davewiki/filecache/ /mntcopy/davewiki/filecache/

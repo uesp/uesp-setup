@@ -1,0 +1,39 @@
+#!/bin/sh
+
+./uesp-yuminstall "mysql"
+
+./uesp-yuminstall "php"
+./uesp-yuminstall "php-pear"
+./uesp-yuminstall "php-pecl-apc"
+./uesp-yuminstall "php-snmp"
+./uesp-yuminstall "php-bcmath"
+./uesp-yuminstall "php-devel"
+./uesp-yuminstall "php-common"
+./uesp-yuminstall "php-cli"
+./uesp-yuminstall "php-pecl-memcache"
+./uesp-yuminstall "php-gd"
+./uesp-yuminstall "php-mbstring"
+./uesp-yuminstall "php-mcrypt"
+./uesp-yuminstall "php-mysql"
+./uesp-yuminstall "php-pdo"
+./uesp-yuminstall "php-xml"
+
+./uesp-yuminstall "perl"
+./uesp-yuminstall "perl-DBD-MySQL"
+./uesp-yuminstall "perl-DBI"
+./uesp-yuminstall "perl-String-CRC32"
+./uesp-yuminstall "perl-URI"
+
+./uesp-yuminstall "httpd"
+/sbin/chkconfig --levels 345 httpd on
+
+./uesp-yuminstall "ImageMagick"
+./uesp-yuminstall "tidy"
+
+#./uesp-mod-ini "/etc/php.ini" "session.save_path" "/mnt/phpsessions"
+cp /etc/php.ini /etc/php.ini.orig
+cp php.ini /etc/php.ini
+cp apc.ini /etc/php.d/apc.ini
+
+./uesp-install-wikidiff2
+

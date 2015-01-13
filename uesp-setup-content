@@ -1,0 +1,55 @@
+#!/bin/sh
+#
+# $1 = Hostname (prompts if missing)
+# $2 = Zabbix Server IP
+#
+
+UESP_HOSTNAME="$1"
+ZABBIXSERVER="$2"
+
+get_uesp_hostname()
+{
+	RESULT=""
+
+	if [ -z "$UESP_HOSTNAME" ]
+	then
+		echo -n "Enter UESP host subdomain: "
+		read UESP_HOSTNAME
+	fi
+
+	UESP_HOSTNAME=`echo $UESP_HOSTNAME | tr '[:upper:]' '[:lower:]'`
+
+	if [ -z $UESP_HOSTNAME ]
+	then
+		echo "     ERROR: Empty UESP host subdomain given!"
+		exit -1
+	else
+		echo "     OK: Using UESP host name '$UESP_HOSTNAME'."
+	fi
+}
+
+get_zabbix_server_ip()
+{
+	RESULT=""
+
+	if [ -z "$ZABBIXSERVER" ]
+	then
+		echo -n "Enter the Zabbix Server IP Address: "
+		read ZABBIXSERVER
+	fi
+
+	if [ -z $ZABBIXSERVER ]
+	then
+		echo "     WARNING: Skipping Zabbix Agent installation due to missing server address!"
+	else
+		echo "     OK: Using Zabbix Server IP '$ZABBIXSERVER'."
+	fi
+}
+
+get_uesp_hostname
+get_zabbix_server_ip
+
+./uesp-setup-common "$UESP_HOSTNAME" "$ZABBIXSERVER"
+./uesp-install-contentapps
+
+./uesp-setup-mounts
