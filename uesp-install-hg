@@ -1,5 +1,3 @@
 #!/bin/sh
 
-yum install setuptool
-yum install python-devel
-easy_install mercurial
+yum install mercurial

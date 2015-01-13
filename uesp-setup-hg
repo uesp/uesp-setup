@@ -1,0 +1,59 @@
+#!/bin/sh
+
+HGRCFILE="$HOME/.hgrc"
+NAME="$1"
+EMAIL="$2"
+USERNAME="$3"
+
+if [ -f "$HGRCFILE" ]; then
+	echo "Error: .hgrc file already exists for current user!"
+	echo "        uesp-setup-hg name email user"
+	exit 1
+fi
+
+if [ -z "$NAME" ]; then
+	echo "Error: Missing name!"
+	echo "        uesp-setup-hg name email user"
+	exit -1
+fi
+
+if [ -z "$EMAIL" ]; then
+	echo "Error: Missing e-mail address!"
+	echo "        uesp-setup-hg name email user"
+	exit -2
+fi
+
+if [ -z "$USERNAME" ]; then
+	echo "Error: Missing Google user name!"
+	echo "        uesp-setup-hg name email user"
+	exit -3
+fi
+
+if [ $# -ne 3 ]; then
+	echo "Error: Expecting 3 input parameters in the form:"
+	echo "        uesp-setup-hg name email user"
+	exit -4
+fi
+
+echo -n "Password: "
+read -s PASSWORD
+echo
+
+cat <<EOT >> "$HGRCFILE"
+[ui]
+username = $NAME <$EMAIL>
+ignore = ~/.hgignore
+
+[auth]
+google.prefix = code.google.com
+google.username = $USERNAME
+google.password = $PASSWORD
+google.schemes = https
+EOT
+
+chmod og-rwx $HGRCFILE
+
+cat <<EOT >> "$HOME/.hgignore"
+syntax: glob
+*.secrets
+EOT
