@@ -2,7 +2,7 @@
 
 echo "Starting uesp-install-baseapps..."
 
-uesp-install-hg
+./uesp-install-hg
 ./uesp-yuminstall "at"
 ./uesp-yuminstall "vsftpd"
 ./uesp-yuminstall "libmcrypt"
