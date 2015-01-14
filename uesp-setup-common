@@ -52,7 +52,7 @@ get_uesp_hostname
 get_zabbix_server_ip
 
 ./uesp-create-users
-./uesp-update-rpm
+./uesp-update-yum
 ./uesp-install-baseapps
 ./uesp-update-sshd
 ./uesp-update-runlevels
