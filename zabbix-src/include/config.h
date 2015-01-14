@@ -185,10 +185,10 @@
 /* #undef HAVE_MTENT_H */
 
 /* Define to 1 if database supports multirow insert statements. */
-/* #undef HAVE_MULTIROW_INSERT */
+#define HAVE_MULTIROW_INSERT 1
 
 /* Define to 1 if MySQL libraries are available */
-/* #undef HAVE_MYSQL */
+#define HAVE_MYSQL 1
 
 /* Define to 1 if you have the <netdb.h> header file. */
 #define HAVE_NETDB_H 1
@@ -197,7 +197,7 @@
 #define HAVE_NETINET_IN_H 1
 
 /* Define to 1 if NET-SNMP should be enabled. */
-/* #undef HAVE_NETSNMP */
+#define HAVE_NETSNMP 1
 
 /* Define to 1 if you have the <net/if.h> header file. */
 #define HAVE_NET_IF_H 1
@@ -206,7 +206,7 @@
 /* #undef HAVE_NET_IF_MIB_H */
 
 /* Define to 1 if you have the <nlist.h> header file. */
-/* #undef HAVE_NLIST_H */
+#define HAVE_NLIST_H 1
 
 /* Define to 1 if ODBC Driver Manager should be used. */
 /* #undef HAVE_ODBC */
@@ -281,10 +281,10 @@
 #define HAVE_SIGNAL_H 1
 
 /* Define to 1 if SNMP should be enabled. */
-/* #undef HAVE_SNMP */
+#define HAVE_SNMP 1
 
 /* Define to 1 if 'session.localname' exist. */
-/* #undef HAVE_SNMP_SESSION_LOCALNAME */
+#define HAVE_SNMP_SESSION_LOCALNAME 1
 
 /* Define to 1 if you have the `snprintf' function. */
 #define HAVE_SNPRINTF 1
@@ -596,7 +596,7 @@
 #define RETSIGTYPE void
 
 /* Disabling debugging messages from NET-SNMP library */
-/* #undef SNMP_NO_DEBUGGING */
+#define SNMP_NO_DEBUGGING /**/
 
 /* Define to 1 if you have the ANSI C header files. */
 #define STDC_HEADERS 1

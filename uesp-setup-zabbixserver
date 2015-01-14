@@ -81,6 +81,14 @@ then
 	exit -4
 fi
 
+cp ./zabbix_server /etc/init.d/
+
+if [ $? != 0 ]
+then
+	echo "     ERROR: Failed to install zabbix script to /etc/init.d/!"
+	exit -5
+fi
+
 popd > /dev/null
 echo "     OK: Installed the Zabbix Server."
 

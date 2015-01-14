@@ -3,3 +3,7 @@ syntax: glob
 *.pyc
 *.log
 *.so
+*.Po
+*.o
+*.a
+zabbix-src/autom4te.cache*
