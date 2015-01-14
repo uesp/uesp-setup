@@ -60,6 +60,10 @@ else
 	fi
 fi
 
+# Fix possible permission issue
+chmod 711 /var/empty/sshd
+chown root:root /var/empty/sshd
+
 /etc/init.d/sshd restart
 
 echo "     OK: Updated the sshd configuration."
