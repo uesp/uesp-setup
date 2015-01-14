@@ -32,6 +32,7 @@
 
 #./uesp-mod-ini "/etc/php.ini" "session.save_path" "/mnt/phpsessions"
 cp /etc/php.ini /etc/php.ini.orig
+cp /etc/php.d/apc.ini /etc/php.d/apc.ini.orig
 cp php.ini /etc/php.ini
 cp apc.ini /etc/php.d/apc.ini
 
