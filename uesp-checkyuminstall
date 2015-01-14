@@ -7,7 +7,7 @@ then
 	exit -1
 fi
 
-CHECKAPP=`yum -q list installed | egrep ^$1[.]`
+CHECKAPP=`yum -q list installed | egrep ^$1\.`
 RESULT=$?
 	
 if [ $RESULT != 0 ]
