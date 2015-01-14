@@ -1,0 +1,14 @@
+#!/bin/sh
+
+echo "Updating all yum installed packages..."
+yum -y update
+RESULT=$?
+
+if [ $RESULT -ne 0 ]; then
+	echo "    Error: Failed to update all yum packages!"
+	exit -1
+fi
+
+echo "    Updated all yum packages!"
+
+exit 0
