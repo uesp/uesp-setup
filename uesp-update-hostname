@@ -3,10 +3,10 @@
 # $1 = UESP host name (e.g., content1)
 #
 
-HOSTNAME=$1
+HOSTNAME="$1.uesp.net"
 NETWORKFILE="/etc/sysconfig/network"
 
-if [ -z $HOSTNAME ]
+if [ -z $1 ]
 then
 	echo "     ERROR: Missing host name! Format: uesp-update-hostname HOSTNAME"
 	exit -1
