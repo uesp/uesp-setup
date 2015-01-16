@@ -50,12 +50,12 @@ add_host_entry()
 add_host_entry "10.2.212.10" 
 add_host_entry "174.142.196.113" 
 
-/sbin/chkconfig --level 345 portmap on
+/sbin/chkconfig --level 345 rpcbind on
 /sbin/chkconfig --level 345 nfs on
 /sbin/chkconfig --level 345 nfslock on
 /sbin/chkconfig --level 345 netfs on
 
-/etc/init.d/portmap start
+/etc/init.d/rpcbind start
 /etc/init.d/nfs start
 /etc/init.d/nfslock start
 
