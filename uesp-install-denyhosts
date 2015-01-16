@@ -23,6 +23,14 @@ then
 	exit -1
 fi
 
+HOSTNAME=`hostname`
+sed -i -e"s/denyhosts@localhost/denyhosts@$HOSTNAME/" /usr/share/denyhosts/denyhosts.cfg
+
+if [ $? != 0 ]
+then
+	echo "     WARNING: Failed to modify denyhosts send e-mail address!"
+fi
+
 cp -f /usr/share/denyhosts/daemon-control-dist /usr/share/denyhosts/daemon-control
 RESULT=$?
 
