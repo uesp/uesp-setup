@@ -56,5 +56,8 @@ get_zabbix_server_ip
 ./uesp-setup-mounts
 
 mkdir /cache
+mkdir /uesp-mobile-cache
 chown apache:uespadmin /cache
 chmod g+rwx /cache
+chown apache:uespadmin /uesp-mobile-cache
+chmod g+rwx /uesp-mobile-cache
