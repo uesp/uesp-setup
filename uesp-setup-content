@@ -51,5 +51,6 @@ get_zabbix_server_ip
 
 ./uesp-setup-common "$UESP_HOSTNAME" "$ZABBIXSERVER"
 ./uesp-install-contentapps
+./uesp-install-modevasive
 
 ./uesp-setup-mounts
