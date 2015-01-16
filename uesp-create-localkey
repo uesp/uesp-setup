@@ -8,14 +8,14 @@ echo "Starting uesp-create-localkey..."
 UESPHOST="$1"
 
 KEYPATH="/etc/uesp-keys/"
-LOCALKEY="local-uesp-key.pub"
+LOCALKEY="keys/local-uesp-key.pub"
 
 create_server_key()
 #
 # $1 = UESP hostname
 #
 {
-	KEYFILE="$1-uesp-key"
+	KEYFILE="keys/$1-uesp-key"
 	PUBKEYFILE="$KEYFILE.pub"
 
 	ssh-keygen -q -t dsa -b 1024 -f $KEYFILE -C "$1.uesp.net" -N ""
@@ -77,5 +77,6 @@ then
 	exit -1
 fi
 
+mkdir -p keys
 create_server_key "$UESPHOST"
 

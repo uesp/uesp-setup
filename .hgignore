@@ -10,4 +10,5 @@ syntax: glob
 *.lai
 *.lo
 *.slo
+keys/*
 zabbix-src/autom4te.cache*
