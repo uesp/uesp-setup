@@ -10,6 +10,7 @@ INSTALLPATH="/usr/local"
 ZABBIXCONF="/etc/zabbix/zabbix_agentd.conf"
 SERVERIP="$1"
 
+./uesp-yuminstall net-snmp-devel
 ./uesp-yuminstall mysql-devel
 
 if [ -z $SERVERIP ]
