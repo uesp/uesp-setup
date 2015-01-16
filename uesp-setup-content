@@ -54,3 +54,7 @@ get_zabbix_server_ip
 ./uesp-install-modevasive
 
 ./uesp-setup-mounts
+
+mkdir /cache
+chown apache:uespadmin /cache
+chmod g+rwx /cache
