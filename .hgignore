@@ -6,4 +6,8 @@ syntax: glob
 *.Po
 *.o
 *.a
+*.la
+*.lai
+*.lo
+*.slo
 zabbix-src/autom4te.cache*
