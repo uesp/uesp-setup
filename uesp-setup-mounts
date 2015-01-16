@@ -37,27 +37,56 @@ add_host_entry()
 # $1 = IP address to add to allow list
 {
 	./uesp-addhostentry "/etc/hosts.allow" "portmap" "$1"
+	./uesp-addhostentry "/etc/hosts.allow" "rpcbind" "$1"
 	./uesp-addhostentry "/etc/hosts.allow" "statd" "$1"
 	./uesp-addhostentry "/etc/hosts.allow" "lockd" "$1"
 	./uesp-addhostentry "/etc/hosts.allow" "mountd" "$1"
 	./uesp-addhostentry "/etc/hosts.allow" "quotad" "$1"
+	./uesp-addhostentry "/etc/hosts.allow" "rquotad" "$1"
 	
+	return 0
+}
+
+add_iptables_entry()
+# $1 = Table
+# $2 = tcp / udp
+# $3 = extra parameters
+{
+	iptables -t nat --list $1 | grep -q "$2 dpt:sunrpc redir ports 3421"
+
+	if [ $? != 0 ]; then
+		echo "     adding iptables rule $1 $2 $3"
+		iptables -t nat -I $1 -p $2 $3 --dport 111 -j REDIRECT --to-ports 3421
+	else
+		echo "     iptables rule $1 $2 $3 already exists"
+	fi
+
 	return 0
 }
 
 
 ./uesp-update-hosts
+
+	# Add files1 IP addresses
 add_host_entry "10.2.212.10" 
-add_host_entry "174.142.196.113" 
+add_host_entry "174.142.196.113"
+
+	# Fix for rpcbind/portmap port issue
+echo "Updating iptables rules for rpcbind/portmap..."
+add_iptables_entry PREROUTING tcp
+add_iptables_entry PREROUTING udp
+add_iptables_entry OUTPUT tcp "-o lo"
+add_iptables_entry OUTPUT udp "-o lo"
+/etc/init.d/iptables save
 
 /sbin/chkconfig --level 345 rpcbind on
 /sbin/chkconfig --level 345 nfs on
 /sbin/chkconfig --level 345 nfslock on
 /sbin/chkconfig --level 345 netfs on
 
-/etc/init.d/rpcbind start
-/etc/init.d/nfs start
-/etc/init.d/nfslock start
+/etc/init.d/rpcbind restart
+/etc/init.d/nfs restart
+/etc/init.d/nfslock restart
 
 mount_path "files1.uesp.net" "/shared/uesp/wikiimages"      "/mnt/uesp/wikiimages"
 mount_path "files1.uesp.net" "/shared/uesp/filecache"       "/mnt/uesp/filecache"
