@@ -10,6 +10,8 @@ INSTALLPATH="/usr/local"
 ZABBIXCONF="/etc/zabbix/zabbix_agentd.conf"
 SERVERIP="$1"
 
+./uesp-yuminstall mysql-devel
+
 if [ -z $SERVERIP ]
 then
 	echo "     ERROR: Missing Zabbix server IP address!"
