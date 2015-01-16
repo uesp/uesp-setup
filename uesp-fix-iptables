@@ -1,0 +1,3 @@
+#!/bin/sh
+
+cp ./iptables.initd /etc/init.d/iptables

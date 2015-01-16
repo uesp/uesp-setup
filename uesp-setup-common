@@ -54,6 +54,7 @@ get_zabbix_server_ip
 ./uesp-create-users
 ./uesp-update-yum
 ./uesp-install-baseapps
+./uesp-fix-iptables
 ./uesp-update-sshd
 ./uesp-update-runlevels
 ./uesp-update-services
