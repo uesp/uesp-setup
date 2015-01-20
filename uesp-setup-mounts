@@ -79,6 +79,8 @@ add_iptables_entry OUTPUT tcp "-o lo"
 add_iptables_entry OUTPUT udp "-o lo"
 /etc/init.d/iptables save
 
+cp ./nfs.sysconfig /etc/sysconfig/nfs
+
 /sbin/chkconfig --level 345 rpcbind on
 /sbin/chkconfig --level 345 nfs on
 /sbin/chkconfig --level 345 nfslock on
