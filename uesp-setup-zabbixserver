@@ -81,7 +81,9 @@ then
 	exit -4
 fi
 
-cp ./zabbix_server /etc/init.d/
+popd > /dev/null
+
+cp ./zabbix_serveri.initd /etc/init.d/zabbix_server
 
 if [ $? != 0 ]
 then
@@ -89,7 +91,9 @@ then
 	exit -5
 fi
 
-popd > /dev/null
+chkconfig --add zabbix_server
+chkconfig --level 345 zabbix_server on
+
 echo "     OK: Installed the Zabbix Server."
 
 ./uesp-install-zabbixagent "$SERVERIP"
