@@ -4,10 +4,12 @@ add_host_entry()
 # $1 = IP address to add to allow list
 {
 	./uesp-addhostentry "/etc/hosts.allow" "portmap" "$1"
+	./uesp-addhostentry "/etc/hosts.allow" "rpcbind" "$1"
 	./uesp-addhostentry "/etc/hosts.allow" "statd" "$1"
 	./uesp-addhostentry "/etc/hosts.allow" "lockd" "$1"
 	./uesp-addhostentry "/etc/hosts.allow" "mountd" "$1"
 	./uesp-addhostentry "/etc/hosts.allow" "quotad" "$1"
+	./uesp-addhostentry "/etc/hosts.allow" "rquotad" "$1"
 	
 	return 0
 }
@@ -24,33 +26,61 @@ add_exports_entry()
 	./uesp-addexportsentry  "/shared/davewiki/filecache"  "$1" 
 }
 
+
+add_iptables_entry()
+# $1 = Table
+# $2 = tcp / udp
+# $3 = extra parameters
+{
+        iptables -t nat --list $1 | grep -q "$2 dpt:sunrpc redir ports 3421"
+
+        if [ $? != 0 ]; then
+                echo "     adding iptables rule $1 $2 $3"
+                iptables -t nat -I $1 -p $2 $3 --dport 111 -j REDIRECT --to-ports 3421
+        else
+                echo "     iptables rule $1 $2 $3 already exists"
+        fi
+
+        return 0
+}
+
+
 ./uesp-update-hosts
-add_host_entry "10.2.212.11"
-add_host_entry "10.2.212.12"
-add_host_entry "10.2.212.14"
+add_host_entry "10.7.143.70"
+add_host_entry "10.7.143.10"
+add_host_entry "10.7.143.20"
 add_host_entry "174.142.196.114"
 add_host_entry "174.142.196.115"
 add_host_entry "174.142.196.117"
-add_host_entry "67.205.76.81"
-add_host_entry "174.142.39.4"
-add_host_entry "174.142.39.5"
 
-add_exports_entry "10.2.212.11"
-add_exports_entry "10.2.212.12"
-add_exports_entry "10.2.212.14"
+add_exports_entry "10.7.143.70"
+add_exports_entry "10.7.143.10"
+add_exports_entry "10.7.143.20"
 add_exports_entry "174.142.196.114"
 add_exports_entry "174.142.196.115"
 add_exports_entry "174.142.196.117"
-add_exports_entry "67.205.76.81"
-add_exports_entry "174.142.39.4"
-add_exports_entry "174.142.39.5"
 /usr/sbin/exportfs -ra
 
-/sbin/chkconfig --level 345 portmap on
-/sbin/chkconfig --level 345 nfs on
+	# Fix for rpcbind/portmap port issue
+echo "Updating iptables rules for rpcbind/portmap..."
+add_iptables_entry PREROUTING tcp
+add_iptables_entry PREROUTING udp
+add_iptables_entry OUTPUT tcp "-o lo"
+add_iptables_entry OUTPUT udp "-o lo"
+/etc/init.d/iptables save
 
-/etc/init.d/portmap start
-/etc/init.d/nfs start
+yes n | cp -i /etc/sysconfig/nfs /etc/sysconfig/nfs.orig
+cp ./nfs.sysconfig /etc/sysconfig/nfs
+
+
+/sbin/chkconfig --level 345 rpcbind on
+/sbin/chkconfig --level 345 nfslock on
+/sbin/chkconfig --level 345 nfs on
+/sbin/chkconfig --level 345 netfs on
+
+/etc/init.d/rpcbind restart
+/etc/init.d/nfs restart
+/etc/init.d/nfslock restart
 
 mkdir -p /shared/phpsessions
 mkdir -p /shared/uesp/wikiimages
@@ -64,6 +94,6 @@ mkdir -p /shared/davewiki/filecache
 mkdir -p /shared/eqwiki/wikiimages
 mkdir -p /shared/eqwiki/filecache
 
-chown -R apache:apache /shared
+# chown -R apache:apache /shared
 
 
