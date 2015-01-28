@@ -26,7 +26,7 @@
   $MYSQL_USER   = "uespinfo";
   $MYSQL_PASSWD = "hQ39ab8Xrt";
 
-  $ZABBIX_SERVER = "10.2.212.14";
+  $ZABBIX_SERVER = "10.7.143.20";
   $ZABBIX_HOST = "content3.uesp.net";
 
   $MYSQL_VALID_STATS = "/etc/zabbix/commands/mysql-zabbix.stats";

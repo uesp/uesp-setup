@@ -21,7 +21,7 @@
   }
 
 
-  $ZABBIX_SERVER = "10.2.212.14";
+  $ZABBIX_SERVER = "10.7.143.20";
   $ZABBIX_HOST = "squid1.uesp.net";
   $SQUID_KEY = "squid";
 

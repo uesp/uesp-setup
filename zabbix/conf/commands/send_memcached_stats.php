@@ -1,10 +1,10 @@
 <?php
 
 $zabbix_sender = "/usr/local/bin/zabbix_sender";
-$zabbix_server = "10.2.212.14";
+$zabbix_server = "10.7.143.20";
 $zabbix_port = 10051;
-$memcache_server = "10.2.212.10";
-$MEMCACHE_NAME = "files1.uesp.net";
+$memcache_server = "10.7.143.70";
+$MEMCACHE_NAME = "content1.uesp.net";
 $memcache_port = 11000;
 $MEMCACHEKEY = "memcache";
 
