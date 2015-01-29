@@ -20,17 +20,17 @@
     }
   }
 
-  $APACHE_KEY = "apache";
+  $LIGHTTPD_KEY = "lighttpd";
 	
   $ZABBIX_SERVER = "10.7.143.20";
-  $ZABBIX_HOST = "content3.uesp.net";
+  $ZABBIX_HOST = "files1.uesp.net";
 
-  $LOGFILE = "/var/log/zabbix/apache_output.log";
+  $LOGFILE = "/var/log/zabbix/lighttpd_output.log";
   if (file_exists($LOGFILE)) unlink($LOGFILE);
 
-  $apache_keys = array();
+  $lighttpd_keys = array();
 
-  getapachestats();
+  getlighttpdstats();
 
   if ($ECHO) echokeys();
 
@@ -42,11 +42,11 @@
 
 function sendvalidkeys()
 {
-  global $apache_keys;
+  global $lighttpd_keys;
 
   $count = 0;
 
-  foreach ($apache_keys as $key => $val)
+  foreach ($lighttpd_keys as $key => $val)
   {
     zabbix_send($key, $val);
     $count++;
@@ -57,7 +57,7 @@ function sendvalidkeys()
 
 
 function zabbix_send ($var, $val) {
-	global $ZABBIX_SERVER, $ZABBIX_HOST, $LOGFILE, $APACHE_KEY;
+	global $ZABBIX_SERVER, $ZABBIX_HOST, $LOGFILE, $LIGHTTPD_KEY;
 
 	switch ( strtolower($val) ) {
 		case "yes":
@@ -73,8 +73,8 @@ function zabbix_send ($var, $val) {
 
 	if ( !is_numeric($val) ) $val = '"'.$val.'"';
 
-	file_put_contents($LOGFILE, "$ZABBIX_SERVER $ZABBIX_HOST 10051 $APACHE_KEY.$var $val\n",FILE_APPEND);
-	$cmd = "/usr/local/bin/zabbix_sender -z $ZABBIX_SERVER -p 10051 -s $ZABBIX_HOST -k $APACHE_KEY.$var -o $val";
+	file_put_contents($LOGFILE, "$ZABBIX_SERVER $ZABBIX_HOST 10051 $LIGHTTPD_KEY.$var $val\n",FILE_APPEND);
+	$cmd = "/usr/local/bin/zabbix_sender -z $ZABBIX_SERVER -p 10051 -s $ZABBIX_HOST -k $LIGHTTPD_KEY.$var -o $val";
 
 	if ( DEBUG ) 
 		echo "$cmd\n";
@@ -84,9 +84,9 @@ function zabbix_send ($var, $val) {
 
 
 
-function getapachestats()
+function getlighttpdstats()
 {
-  global $apache_keys;
+  global $lighttpd_keys;
 
   $options = array(
 	CURLOPT_RETURNTRANSFER => true,
@@ -115,7 +115,7 @@ function getapachestats()
       parsescoreboard($keyvalue);
     }
     else {
-      $apache_keys[$keyname] = $keyvalue;
+      $lighttpd_keys[$keyname] = $keyvalue;
     }
   }
 
@@ -124,82 +124,75 @@ function getapachestats()
 
 function parsescoreboard ($scoreboard)
 {
-  global $apache_keys;
+  global $lighttpd_keys;
 
   $keepalivecnt = 0;
   $writecnt     = 0;
   $readcnt      = 0;
   $closecnt     = 0;
-  $waitcnt      = 0;
-  $dnscnt       = 0;
-  $startcnt     = 0;
-  $logcnt       = 0;
-  $gracecnt     = 0;
-  $idlecnt      = 0;
+  $handlecnt    = 0;
+  $requestcnt   = 0;
+  $responsecnt  = 0;
   $opencnt      = 0;
+  $errorcnt     = 0;
 
   for ($i = 0; $i < strlen($scoreboard); ++$i)
   {
     switch ($scoreboard[$i])
     {
-      case "_":
-        $waitcnt++;
+      case "h":
+        $handlecnt++;
  	break;
-      case "K":
+      case "E":
+	$errorcnt++;
+	break;
+      case "k":
         $keepalivecnt++;
 	break;
       case "W":
         $writecnt++;
 	break;
+      case "r":
       case "R":
         $readcnt++;
 	break;
       case "C":
         $closecnt++;
 	break; 
-      case "D":
-        $dnscnt++;
+      case "q":
+      case "Q":
+        $requestcnt++;
 	break;
-      case "I":
-	$idlecnt++;
+      case "s":
+      case "S":
+	$responsecnt++;
 	break;
       case ".":
 	$opencnt++;
-	break;
-      case "L":
-	$logcnt++;
-	break;
-      case "S":
-	$startcnt++;
-	break;
-      case "G":
-	$gracecnt++;
 	break;
       default:
 	break;
     }
   }
 
-  $apache_keys["waitcount"] = $waitcnt;
-  $apache_keys["writecount"] = $writecnt;
-  $apache_keys["readcount"] = $readcnt;
-  $apache_keys["closecount"] = $closecnt;
-  $apache_keys["dnscount"] = $dnscnt;
-  $apache_keys["startcount"] = $startcnt;
-  $apache_keys["logcount"] = $logcnt;
-  $apache_keys["gracecount"] = $gracecnt;
-  $apache_keys["idlecount"] = $idlecnt;
-  $apache_keys["opencount"] = $opencnt;
-  $apache_keys["keepalivecount"] = $keepalivecnt;
+  $lighttpd_keys["handlecount"] = $handlecnt;
+  $lighttpd_keys["writecount"] = $writecnt;
+  $lighttpd_keys["readcount"] = $readcnt;
+  $lighttpd_keys["closecount"] = $closecnt;
+  $lighttpd_keys["requestcount"] = $requestcnt;
+  $lighttpd_keys["responsecount"] = $responsecnt;
+  $lighttpd_keys["opencount"] = $opencnt;
+  $lighttpd_keys["errorcount"] = $errorcnt;
+  $lighttpd_keys["keepalivecount"] = $keepalivecnt;
 
 }
 
 
 function echokeys()
 {
-  global $apache_keys;
+  global $lighttpd_keys;
 
-  foreach ($apache_keys as $key => $value)
+  foreach ($lighttpd_keys as $key => $value)
   {
     echo ("$key = $value\n");
   }

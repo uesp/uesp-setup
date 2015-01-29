@@ -1,0 +1,2 @@
+#!/bin/sh
+php -f /etc/zabbix/commands/send_lighttpd_stats.php $1 $2 $3 $4
