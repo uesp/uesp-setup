@@ -90,10 +90,11 @@ function getlighttpdstats()
 
   $options = array(
 	CURLOPT_RETURNTRANSFER => true,
-	CURLOPT_HEADER         => false
+	CURLOPT_HEADER         => false,
+  	CURLOPT_SSL_VERIFYHOST => false,
   );
 
-  $curl = curl_init("http://localhost/server-status?auto");
+  $curl = curl_init("https://localhost/server-status?auto");
   curl_setopt_array($curl, $options );
   $content = curl_exec( $curl );
   $err = curl_errno( $curl );
