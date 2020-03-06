@@ -31,6 +31,7 @@
   $apache_keys = array();
 
   getapachestats();
+  getapacherequesttimestats();
 
   if ($ECHO) echokeys();
 
@@ -118,6 +119,31 @@ function getapachestats()
     else {
       $apache_keys[$keyname] = $keyvalue;
     }
+  }
+
+}
+
+
+function getapacherequesttimestats()
+{
+  global $apache_keys;
+
+  $options = array(
+	CURLOPT_RETURNTRANSFER => true,
+	CURLOPT_HEADER         => false,
+  	CURLOPT_SSL_VERIFYHOST => false,
+  );
+
+  $curl = curl_init("https://localhost/server-status");
+  curl_setopt_array($curl, $options );
+  $content = curl_exec( $curl );
+  $err = curl_errno( $curl );
+
+  $result = preg_match_all('#<tr>(.*?)</tr>#s', $content, $matches);
+  if ($result == false) return false;
+  
+  foreach ($matches as $key => $match)
+  {
   }
 
 }
