@@ -1,0 +1,9 @@
+#!/bin/sh
+
+mkdir -p /home/uesp/cache
+mkdir -p /home/uesp/cache/_ar
+mkdir -p /home/uesp/cache/_it
+mkdir -p /home/uesp/cache/_pt
+
+chown apache:uespadmin -R /home/uesp/cache
+chmod g+rwx -R /home/uesp/cache

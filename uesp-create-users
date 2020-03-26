@@ -143,7 +143,10 @@ add_user_to_group()
 
 create_group "uespadmin" 522
 create_group "uespforum" 521
-
+create_user "varnish"     496
+create_user "nginx"       497
+create_user "lighttpd"    498
+create_user "memcached"   499
 create_user "techiweb"    500
 create_user "sshadmin"    501
 create_user "apache"      502
@@ -167,10 +170,29 @@ create_user "egd"         610
 create_user "avron"       700
 create_user "steve"       701
 create_user "viud"        702
+create_user "jeremy"      703
+create_user "teamspeak"   704
+
+# Old users/groups no longer in use
+# create_user "sshbackup"   520
+# create_user "uespinfo"    526
+# create_user "svn"         533
+# create_user "qmail"       601
+# create_user "alias"       602
+# create_user "qmaild"      603 "qmail"
+# create_user "qmaill"      604 "qmail"
+# create_user "qmailp"      605 "qmail"
+# create_user "qmailg"      606 "qmail"
+# create_user "qmailr"      607 "qmail"
+# create_user "qmails"      608 "qmail"
+# create_user "vpopmail"    609
 
 add_user_to_group "dave" "uespadmin"
 add_user_to_group "dave" "uesp"
 add_user_to_group "dave" "apache"
 add_user_to_group "dave" "mysql"
 add_user_to_group "dave" "uespforum"
+
+add_user_to_group "robinhood" "uespadmin"
+add_user_to_group "robinhood" "uesp"
 

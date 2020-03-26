@@ -1,2 +1,0 @@
-#!/bin/sh
-php -f /etc/zabbix/commands/send_memcached_stats.php

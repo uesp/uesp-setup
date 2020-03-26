@@ -51,21 +51,20 @@ echo "Starting uesp-setup-common..."
 get_uesp_hostname
 get_zabbix_server_ip
 
-./uesp-create-users
-./uesp-update-yum
-./uesp-install-baseapps
-./uesp-fix-iptables
-./uesp-update-sshd
-./uesp-update-runlevels
-./uesp-update-services
-./uesp-install-denyhosts
-./uesp-update-path
-./uesp-update-maxfiles
 ./uesp-update-hostname "$UESP_HOSTNAME"
 ./uesp-create-localkey  "$UESP_HOSTNAME"
 
+./uesp-create-users
+./uesp-update-yum
+./uesp-install-baseapps
+./uesp-update-sshd
+./uesp-install-denyhosts
+./uesp-update-path
+./uesp-update-maxfiles
+./uesp-update-bashrc "new"
+
 if [ ! -z "$ZABBIXSERVER" ]
 then
-	./uesp-install-zabbixagent "$ZABBIXSERVER"
+	./uesp-install-zabbixagent "$UESP_HOSTNAME" "$ZABBIXSERVER" 
 fi
 

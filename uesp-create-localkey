@@ -18,7 +18,7 @@ create_server_key()
 	KEYFILE="keys/$1-uesp-key"
 	PUBKEYFILE="$KEYFILE.pub"
 
-	ssh-keygen -q -t dsa -b 1024 -f $KEYFILE -C "$1.uesp.net" -N ""
+	ssh-keygen -q -t rsa -b 4096 -a 100 -f $KEYFILE -C "$1.uesp.net" -N ""
 	RESULT=$?
 	
 	if [ $RESULT != 0 ]
@@ -59,10 +59,41 @@ create_server_key()
 			echo "     ERROR: Failed to create directory '$HOMEPATH'!"
 		else
 			chown uespkey:uespkey "$HOMEPATH"
+			chmod 700 $HOMEPATH
 		fi
 	fi
 
-	cp -f $LOCALKEY $HOMEPATH/id_dsa
+	cp -f $KEYFILE $HOMEPATH/id_rsa
+	chown uespkey:uespkey $HOMEPATH/id_rsa
+	chmod 600 $HOMEPATH/id_rsa
+	
+	cp -f $KEYFILE /etc/uesp-keys/local-uesp-key
+	chown uespkey:uespkey /etc/uesp-keys/local-uesp-key
+	chmod 600 /etc/uesp-keys/local-uesp-key
+	
+	touch $HOMEPATH/authorized_keys
+	chmod 600 $HOMEPATH/authorized_keys
+	
+	HOMEPATH="/home/dave/.ssh"
+
+	if [ ! -d "$HOMEPATH" ]
+	then
+		mkdir -p "$HOMEPATH"
+
+		if [ $? != 0 ]
+		then
+			echo "     ERROR: Failed to create directory '$HOMEPATH'!"
+		else
+			chown dave:dave "$HOMEPATH"
+			chmod 700 $HOMEPATH
+		fi
+	fi
+
+	cp -f $KEYFILE $HOMEPATH/id_rsa
+	chown dave:dave $HOMEPATH/id_rsa
+	chmod 600 $HOMEPATH/id_rsa
+	touch $HOMEPATH/authorized_keys
+	chmod 600 $HOMEPATH/authorized_keys
 
 	cp -f $PUBKEYFILE $KEYPATH
 	cp -f $LOCALKEY $KEYPATH

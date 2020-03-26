@@ -60,11 +60,34 @@ else
 	fi
 fi
 
+RESULT=`egrep -ci "[#]?[ ^I]*ClientAliveCountMax[ ^I]+" $SSHCONF`
+
+if [ $RESULT > 0 ]
+then
+	sed -i "s:^[ ^I]*[#]*[ ^I]*ClientAliveCountMax[ ^I]*.*:ClientAliveCountMax 100:i" $SSHCONF
+
+	if [ $? != 0 ]
+	then
+		echo "     ERROR: Failed to update ClientAliveCountMax in '$$SHCONF'!"
+		exit -4
+	fi
+else
+
+	echo "ClientAliveCountMax 100" >> $SSHCONF
+
+	if [ $? != 0 ]
+	then
+		echo "     ERROR: Failed to add 'ClientAliveCountMax' to end of '$SSHCONF'!"
+		exit -5
+	fi
+fi
+
+
 # Fix possible permission issue
-chmod 711 /var/empty/sshd
+chmod 644 /var/empty/sshd
 chown root:root /var/empty/sshd
 
-/etc/init.d/sshd restart
+ service sshd restart
 
 echo "     OK: Updated the sshd configuration."
 exit 0

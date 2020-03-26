@@ -1,9 +1,3 @@
 #!/bin/sh
 
-yum install hg
-
-
-# yum -y remove mercurial
-
-# wget http://pkgs.repoforge.org/mercurial/mercurial-2.2.2-1.el6.rfx.x86_64.rpm -p /tmp
-# rpm -Uvh  /tmp/mercurial-2.2.2-1.el6.rfx.x86_64.rpm
+./uesp-yuminstall "mercurial"

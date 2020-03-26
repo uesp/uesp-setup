@@ -47,56 +47,18 @@ add_host_entry()
 	return 0
 }
 
-add_iptables_entry()
-# $1 = Table
-# $2 = tcp / udp
-# $3 = extra parameters
-{
-	iptables -t nat --list $1 | grep -q "$2 dpt:sunrpc redir ports 3421"
+./uesp-yuminstall "nfs-utils"
 
-	if [ $? != 0 ]; then
-		echo "     adding iptables rule $1 $2 $3"
-		iptables -t nat -I $1 -p $2 $3 --dport 111 -j REDIRECT --to-ports 3421
-	else
-		echo "     iptables rule $1 $2 $3 already exists"
-	fi
+# ./uesp-update-hosts
 
-	return 0
-}
+mkdir -p /mnt/uesp
 
+mount_path "10.12.222.41" "/shared/uesp"      "/mnt/uesp"
 
-./uesp-update-hosts
-
-	# Add files1 IP addresses
-add_host_entry "10.2.212.10" 
-add_host_entry "174.142.196.113"
-
-	# Fix for rpcbind/portmap port issue
-echo "Updating iptables rules for rpcbind/portmap..."
-add_iptables_entry PREROUTING tcp
-add_iptables_entry PREROUTING udp
-add_iptables_entry OUTPUT tcp "-o lo"
-add_iptables_entry OUTPUT udp "-o lo"
-/etc/init.d/iptables save
-
-yes n | cp -i /etc/sysconfig/nfs /etc/sysconfig/nfs.orig
-cp ./nfs.sysconfig /etc/sysconfig/nfs
-
-/sbin/chkconfig --level 345 rpcbind on
-/sbin/chkconfig --level 345 nfs on
-/sbin/chkconfig --level 345 nfslock on
-/sbin/chkconfig --level 345 netfs on
-
-/etc/init.d/rpcbind restart
-/etc/init.d/nfs restart
-/etc/init.d/nfslock restart
-
-mount_path "files1.uesp.net" "/shared/uesp/wikiimages"      "/mnt/uesp/wikiimages"
-mount_path "files1.uesp.net" "/shared/uesp/filecache"       "/mnt/uesp/filecache"
-mount_path "files1.uesp.net" "/shared/phpsessions"          "/mnt/phpsessions"
-mount_path "files1.uesp.net" "/shared/eqwiki/wikiimages"    "/mnt/eqwiki/wikiimages"
-mount_path "files1.uesp.net" "/shared/eqwiki/filecache"    "/mnt/eqwiki/filecache"
-mount_path "files1.uesp.net" "/shared/davewiki/wikiimages"   "/mnt/davewiki/wikiimages"
-mount_path "files1.uesp.net" "/shared/davewiki/filecache"   "/mnt/davewiki/filecache"
+# mount_path "10.12.222.41" "/shared/phpsessions"          "/mnt/phpsessions"
+# mount_path "10.12.222.41" "/shared/eqwiki/wikiimages"    "/mnt/eqwiki/wikiimages"
+# mount_path "10.12.222.41" "/shared/eqwiki/filecache"     "/mnt/eqwiki/filecache"
+# mount_path "10.12.222.41" "/shared/davewiki/wikiimages"  "/mnt/davewiki/wikiimages"
+# mount_path "10.12.222.41" "/shared/davewiki/filecache"   "/mnt/davewiki/filecache"
 
 

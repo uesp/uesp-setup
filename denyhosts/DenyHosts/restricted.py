@@ -1,18 +1,14 @@
 import os
 
-from constants import RESTRICTED_USERNAMES
-try:
-    set = set
-except:
-    from sets import Set
-    set = Set
-    
+from .constants import RESTRICTED_USERNAMES
+
+
 class Restricted:
     def __init__(self, prefs):
-        self.filename = os.path.join(prefs['WORK_DIR'], RESTRICTED_USERNAMES)
+        self.filename = os.path.join(prefs['ETC_DIR'], RESTRICTED_USERNAMES)
         self.__data = set()
         self.load_restricted()
-        
+
     def load_restricted(self):
         try:
             fp = open(self.filename, "r")
@@ -21,7 +17,7 @@ class Restricted:
                 if not line: continue
                 if line[0] == '#': continue
                 self.__data.add(line)
-        except:
+        except IOError:
             pass
 
     def get_restricted(self):

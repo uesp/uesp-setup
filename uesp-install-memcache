@@ -1,37 +1,28 @@
 #!/bin/sh
 #
-# $1 = IP to bind memcached server to
 #
-# ./uesp-yuminstall "libevent-devel"
+#
 
 ./uesp-yuminstall "memcached"
 
-SERVERIP="$1"
+CACHESIZE="1000"
+MAXCONN="5000"
+PORT="11000"
+CONFIG="/etc/sysconfig/memcached"
 
-if [ -z $SERVERIP ]
-then
-	echo "     WARNING: Missing memcached server IP address, using default of 127.0.0.1!"
-	SERVERIP="127.0.0.1"
-fi
+sed -i "s/CACHESIZE=.*/CACHESIZE=\"$CACHESIZE\"/g" "$CONFIG"
+sed -i "s/PORT=.*/PORT=\"$PORT\"/g" "$CONFIG"
+sed -i "s/MAXCONN=.*/MAXCONN=\"$MAXCONN\"/g" "$CONFIG"
 
-sed "s:^\([ ^I]*MEMCACHEDIP[ ^I]*=[ ^I]*\)\".*\":\1\"$SERVERIP\":" ./memcached.initd > /etc/init.d/memcached
-
-if [ $? != 0 ]
-then
-	echo "     ERROR: Failed to setup initialization script in '/etc/init.d/'!"
-	exit -6
-fi
-
-chmod 755 /etc/init.d/memcached
-/sbin/chkconfig --add memcached
+systemctl enable memcached
 
 if [ $? != 0 ]
 then
-	echo "     ERROR: Failed to add initialization script chkconfig!"
+	echo "     ERROR: Failed to add memcached to systemctl!"
 	exit -7
 fi
 
-/etc/init.d/memcached restart > /dev/null
+service memcached restart
 
 if [ $? != 0 ]
 then

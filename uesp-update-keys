@@ -1,10 +1,20 @@
 #!/bin/sh
+#
+# $1 = Username to modify (defaults to uespkey)
+#
 
-AUTHKEYPATH="/home/uespkey/.ssh"
-AUTHKEYS="/home/uespkey/.ssh/authorized_keys"
 KEYPATH="/etc/uesp-keys/"
 LOCALKEY="local-uesp-key.pub"
-USER="uespkey"
+USER="$1"
+
+if [ -z "$USER" ]
+then
+	USER="uespkey"
+	echo "   Using user uespkey"
+fi
+
+AUTHKEYPATH="/home/$USER/.ssh"
+AUTHKEYS="/home/$USER/.ssh/authorized_keys"
 
 update_from_publickey()
 #
@@ -21,13 +31,16 @@ update_from_publickey()
 
 	if [ ! -d $AUTHKEYPATH ]
 	then
-		mkdir $AUTHKEYPATH
+		mkdir -p $AUTHKEYPATH
+		chown $USER:$USER $AUTHKEYPATH
+		chmod 700 $AUTHKEYPATH
 	fi
 
 	if [ ! -f $AUTHKEYS ]
 	then
 		touch $AUTHKEYS
 		chown $USER:$USER $AUTHKEYS
+		chmod 600 $AUTHKEYS
 	fi
 
 	echo "   Checking public key '$KEYFILE'..."

@@ -1,7 +1,0 @@
-#!/bin/sh
-
-cp ./iptables.initd /etc/init.d/iptables
-cp ./ip6tables.initd /etc/init.d/ip6tables
-
-chkconfig --level 345 iptables on
-chkconfig --level 345 ip6tables on

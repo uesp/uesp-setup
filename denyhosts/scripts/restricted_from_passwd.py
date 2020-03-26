@@ -1,4 +1,4 @@
-#!/bin/env python
+#!/usr/bin/env python
 #
 ############################################################################
 # this script will read the /etc/passwd file and extract usernames
@@ -10,13 +10,12 @@
 # where $WORK_DIR is your DenyHosts WORK_DIR parameter
 #
 ############################################################################
-
-RESTRICTED_SHELLS = ("/sbin/nologin",
-                     "/sbin/shutdown",
-                     "/sbin/halt")
-
 from pwd import getpwall
 
+RESTRICTED_SHELLS = ("/sbin/nologin",
+                     "/usr/sbin/nologin",
+                     "/sbin/shutdown",
+                     "/sbin/halt")
 passwd = getpwall()
 
 usernames = []
@@ -27,5 +26,3 @@ for pw_tuple in passwd:
 usernames.sort()
 for username in usernames:
     print username
-    
-                     

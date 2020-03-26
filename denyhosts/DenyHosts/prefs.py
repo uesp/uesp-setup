@@ -1,26 +1,22 @@
-import os, sys, re
-from util import die, calculate_seconds, is_true
-from regex import PREFS_REGEX
 import logging
+import os
+import re
+
+from .regex import PREFS_REGEX
+from .util import die, calculate_seconds
 
 debug = logging.getLogger("prefs").debug
 info = logging.getLogger("prefs").info
 
-
 ENVIRON_REGEX = re.compile(r"""\$\[(?P<environ>[A-Z_]*)\]""")
-
-try:
-    set = set
-except:
-    from sets import Set
-    set = Set
 
 
 class Prefs(dict):
     def __getitem__(self, k):
         return self.get(k)
-    
-    def __init__(self, path=None):
+
+    def __init__(self, path=None, **kwargs):
+        super(Prefs, self).__init__(**kwargs)
         # default values for some of the configurable items
         self.__data = {'ADMIN_EMAIL': None,
                        'SUSPICIOUS_LOGIN_REPORT_ALLOWED_HOSTS': 'yes',
@@ -38,6 +34,11 @@ class Prefs(dict):
                        'RESET_ON_SUCCESS': 'no',
                        'PLUGIN_DENY': None,
                        'PLUGIN_PURGE': None,
+                       'IPTABLES': None,
+                       'BLOCKPORT': None,
+                       'PFCTL_PATH': None,
+                       'PF_TABLE': None,
+                       'PF_TABLE_FILE': None,
                        'SMTP_USERNAME': None,
                        'SMTP_PASSWORD': None,
                        'SMTP_DATE_FORMAT': "%a, %d %b %Y %H:%M:%S %z",
@@ -49,9 +50,11 @@ class Prefs(dict):
                        'FAILED_ENTRY_REGEX5': None,
                        'FAILED_ENTRY_REGEX6': None,
                        'FAILED_ENTRY_REGEX7': None,
-#                       'FAILED_ENTRY_REGEX8': None,
-#                       'FAILED_ENTRY_REGEX9': None,
-#                       'FAILED_ENTRY_REGEX10': None,
+                       'FAILED_ENTRY_REGEX8': None,
+                       'FAILED_ENTRY_REGEX9': None,
+                       'FAILED_ENTRY_REGEX10': None,
+                       'FAILED_DOVECOT_ENTRY_REGEX': None,
+                       'DETECT_DOVECOT_LOGIN_ATTEMPTS': "no",
                        'USERDEF_FAILED_ENTRY_REGEX': [],
                        'SUCCESSFUL_ENTRY_REGEX': None,
                        'SYNC_INTERVAL': '1h',
@@ -61,7 +64,8 @@ class Prefs(dict):
                        'SYNC_DOWNLOAD_THRESHOLD': 3,
                        'SYNC_DOWNLOAD_RESILIENCY': '5h',
                        'PURGE_THRESHOLD': 0,
-                       'ALLOWED_HOSTS_HOSTNAME_LOOKUP': 'no'}
+                       'ALLOWED_HOSTS_HOSTNAME_LOOKUP': 'no',
+                       'ETC_DIR': '/etc'}
 
         # reqd[0]: required field name
         # reqd[1]: is value required? (False = value can be blank)
@@ -74,20 +78,30 @@ class Prefs(dict):
                      ('BLOCK_SERVICE', False),
                      ('PURGE_DENY', False),
                      ('HOSTS_DENY', True),
-                     ('WORK_DIR', True))
-        
+                     ('WORK_DIR', True),
+                     ('ETC_DIR', False),
+                     ('IPTABLES', False),
+                     ('BLOCKPORT', False),
+                     ('PFCTL_PATH', False),
+                     ('PF_TABLE', False),
+                     ('PF_TABLE_FILE', False))
+
         # the paths for these keys will be converted to
         # absolute pathnames (in the event they are relative)
         # since the --daemon mode requires absolute pathnames
         self.make_abs = ('WORK_DIR',
+                         'ETC_DIR',
                          'LOCK_FILE',
                          'SECURE_LOG',
                          'HOSTS_DENY',
-                         'DAEMON_LOG')
+                         'DAEMON_LOG',
+                         'IPTABLES',
+                         'PFCTL_PATH',
+                         'PF_TABLE_FILE')
 
         # these settings are converted to numeric values
         self.to_int = set(('DENY_THRESHOLD',
-                           'DENY_THRESHOLD_INVALID', 
+                           'DENY_THRESHOLD_INVALID',
                            'DENY_THRESHOLD_VALID',
                            'DENY_THRESHOLD_ROOT',
                            'DENY_THRESHOLD_RESTRICTED',
@@ -106,24 +120,22 @@ class Prefs(dict):
                                'SYNC_DOWNLOAD_RESILIENCY',
                                'AGE_RESET_ROOT'))
 
-
         self.process_defaults()
-        if path: self.load_settings(path)
+        if path:
+            self.load_settings(path)
 
     def process_defaults(self):
         for name in self.to_seconds:
             try:
                 self.__data[name] = calculate_seconds(self.__data[name])
-            except:
+            except Exception:
                 pass
 
-        
     def load_settings(self, path):
         try:
             fp = open(path, "r")
-        except Exception, e :
+        except Exception as e :
             die("Error reading file: %s" % path, e)
-
 
         for line in fp:
             line = line.strip()
@@ -134,9 +146,10 @@ class Prefs(dict):
                 if m:
                     name = m.group('name').upper()
                     value = self.environ_sub(m.group('value'))
-                    
-                    #print name, value
-                    if not value: value = None
+
+                    # print name, value
+                    if not value:
+                        value = None
                     if name in self.to_int:
                         value = int(value)
                     if name in self.to_seconds and value:
@@ -145,13 +158,12 @@ class Prefs(dict):
                         self.__data['USERDEF_FAILED_ENTRY_REGEX'].append(re.compile(value))
                     else:
                         self.__data[name] = value
-            except Exception, e:
+            except Exception as e:
                 fp.close()
                 die("Error processing configuration parameter %s: %s" % (name, e))
         fp.close()
         self.check_required(path)
         self.make_absolute()
-
 
     def make_absolute(self):
         for key in self.make_abs:
@@ -159,65 +171,60 @@ class Prefs(dict):
             if val:
                 self.__data[key] = os.path.abspath(val)
 
-
     def check_required(self, path):
         ok = 1
         for name_reqd, val_reqd in self.reqd:
-            if not self.__data.has_key(name_reqd):
-                print "Missing configuration parameter: %s" % name_reqd
+            if name_reqd not in self.__data:
+                print("Missing configuration parameter: %s" % name_reqd)
                 if name_reqd == 'DENY_THRESHOLD_INVALID':
-                    print "\nNote: The configuration parameter DENY_THRESHOLD has been renamed"
-                    print "      DENY_THRESHOLD_INVALID.  Please update your DenyHosts configuration"
-                    print "      file to reflect this change."
+                    print("\nNote: The configuration parameter DENY_THRESHOLD has been renamed")
+                    print("      DENY_THRESHOLD_INVALID.  Please update your DenyHosts configuration")
+                    print("      file to reflect this change.")
 
-                    if self.__data.has_key('DENY_THRESHOLD'):
-                        print "\n*** Using deprecated DENY_THRESHOLD value for DENY_THRESHOLD_INVALID ***"
+                    if 'DENY_THRESHOLD' in self.__data:
+                        print("\n*** Using deprecated DENY_THRESHOLD value for DENY_THRESHOLD_INVALID ***")
                         self.__data['DENY_THRESHOLD_INVALID'] = self.__data['DENY_THRESHOLD']
                     else:
-                        ok = 0                        
+                        ok = 0
                 elif name_reqd == 'DENY_THRESHOLD_RESTRICTED':
-                    print "\nNote: DENY_THRESHOLD_RESTRICTED has not been defined. Setting this"
-                    print "value to DENY_THRESHOLD_ROOT"
+                    print("\nNote: DENY_THRESHOLD_RESTRICTED has not been defined. Setting this")
+                    print("value to DENY_THRESHOLD_ROOT")
                     self.__data['DENY_THRESHOLD_RESTRICTED'] = self.__data['DENY_THRESHOLD_ROOT']
                 else:
                     ok = 0
             elif val_reqd and not self.__data[name_reqd]:
-                print "Missing configuration value for: %s" % name_reqd
+                print("Missing configuration value for: %s" % name_reqd)
                 ok = 0
 
         if not ok:
             die("You must correct these problems found in: %s" % path)
 
-
     def environ_sub(self, value):
         while True:
             environ_match = ENVIRON_REGEX.search(value)
-            if not environ_match: return value
+            if not environ_match:
+                return value
             name = environ_match.group("environ")
             env = os.environ.get(name)
             if not env:
                 die("Could not find environment variable: %s" % name)
             value = ENVIRON_REGEX.sub(env, value)
-                
 
     def get(self, name):
         return self.__data[name]
 
-
-
     def dump(self):
-        print "Preferences:"
-        keys = self.__data.keys()
+        print("Preferences:")
+        keys = list(self.__data.keys())
         for key in keys:
             if key == 'USERDEF_FAILED_ENTRY_REGEX':
                 for rx in self.__data[key]:
-                    print "   %s: [%s]" % (key, rx.pattern)
+                    print("   %s: [%s]" % (key, rx.pattern))
             else:
-                print "   %s: [%s]" % (key, self.__data[key])
+                print("   %s: [%s]" % (key, self.__data[key]))
 
-    
     def dump_to_logger(self):
-        keys = self.__data.keys()
+        keys = list(self.__data.keys())
         keys.sort()
         info("DenyHosts configuration settings:")
         for key in keys:
@@ -226,4 +233,3 @@ class Prefs(dict):
                     info("   %s: [%s]" % (key, rx.pattern))
             else:
                 info("   %s: [%s]", key, self.__data[key])
-

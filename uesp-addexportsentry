@@ -37,7 +37,7 @@ else
 	fi
 fi
 
-sed -i "s:^\([ ^I]*$LOCALPATH[ ^I]*.*\)$:\1   $IPADDRESS(rw):i" "$EXPORTS"
+sed -i "s:^\([ ^I]*$LOCALPATH[ ^I]*.*\)$:\1   $IPADDRESS(rw,sync,no_root_squash,no_all_squash):i" "$EXPORTS"
 
 if [ $? != 0 ]
 then

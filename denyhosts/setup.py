@@ -1,42 +1,66 @@
 #!/usr/bin/env python
 # Copyright 2005-2006 (C) Phil Schwartz <phil_schwartz@users.sourceforge.net>
-from DenyHosts.version import VERSION
-from distutils.core import setup
-import os
-import os.path
-import sys
+# Copyright 2014 (C) Jesse Smith <jessefrgsmith@yahoo.ca>
+
 from glob import glob
+import sys
+from os.path import join as ospj
+from os.path import exists as fcheck
 
+from distutils.core import setup
 
+from DenyHosts.util import normalize_whitespace
+from DenyHosts.version import VERSION
+
+etcpath = "/etc"
+manpath = "/usr/share/man/man8"
 libpath = "/usr/share/denyhosts"
-scriptspath = "%s/scripts" % libpath
-pluginspath = "%s/plugins" % libpath
+scriptspath = ospj("scripts", libpath)
+pluginspath = ospj("plugins", libpath)
+denyhostsman = 'denyhosts.8'
 
-#########################################################################
+if 'rpm' in sys.argv[1]:
+    denyhostsman += '.gz'
 
-setup(name="DenyHosts",
-      version=VERSION,
-      description="DenyHosts is a utility to help sys admins thwart ssh hackers",
-      author="Phil Schwartz",
-      author_email="phil_schwartz@users.sourceforge.net",
-      url="http://denyhosts.sourceforge.net",
-      scripts=['denyhosts.py'],
-      package_dir={'DenyHosts': 'DenyHosts'},
-      packages=["DenyHosts"],
-      data_files=[(libpath, glob("denyhosts.cfg-dist")),
-                  (libpath, glob("setup.py")),
-                  (libpath, glob("daemon-control-dist")),
-                  (libpath, glob("CHANGELOG.txt")),
-                  (libpath, glob("README.txt")),
-                  (scriptspath, glob("scripts/*")),
-                  (pluginspath, glob("plugins/*")),
-                  (libpath, glob("LICENSE.txt"))],
-      license="GPL v2",
-      ##extra_path='denyhosts',
-      long_description="""
-DenyHosts is a python program that automatically blocks ssh attacks by adding entries to 
-/etc/hosts.deny. DenyHosts will also inform Linux administrators about offending hosts, attacked 
-users and suspicious logins.
-      """
-      )
+if fcheck(etcpath + '/' + 'denyhosts.conf'):
+    backup = ['Y', 'y', 'yes', 'YES', 'Yes', '']
+    backup_question = 'We have detected that you have an existing config file, would you like to back it up? [Y|N]: '
+    try:  # python 2.x
+        backup_file = raw_input(backup_question)
+    except NameError:  # python 3
+        backup_file = input(backup_question)
 
+    if backup_file in backup:
+        from distutils.file_util import copy_file
+        from time import time
+
+        copy_file(
+            (etcpath + '/' + 'denyhosts.conf'),
+            (etcpath + '/' + 'denyhosts.conf.{0}'.format(int(time())))
+        )
+
+setup(
+    name="DenyHosts",
+    version=VERSION,
+    description="DenyHost is a utility to help sys admins thwart ssh hackers",
+    author="Jesse Smith",
+    author_email="jessefrgsmith@yahoo.ca",
+    url="http://denyhost.sourceforge.net",
+    scripts=['denyhosts.py', 'daemon-control-dist'],
+    package_dir={'DenyHosts': 'DenyHosts'},
+    packages=["DenyHosts"],
+    requires=["ipaddr"],
+    data_files=[
+        (etcpath, glob("denyhosts.conf")),
+        (manpath, glob(denyhostsman)),
+    ],
+    license="GPL v2",
+    long_description=normalize_whitespace(
+        """
+        DenyHosts is a python program that automatically blocks ssh attacks
+        by adding entries to /etc/hosts.deny. DenyHosts will also inform
+        administrators about offending hosts, attacked users and suspicious
+        logins. Originally written by Phil Schwartz.
+        """
+    ),
+)

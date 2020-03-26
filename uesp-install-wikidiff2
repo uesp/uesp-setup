@@ -1,45 +1,87 @@
 #!/bin/sh
 
-make --quiet -C ./wikidiff2 2> /dev/null
+./uesp-yuminstall "libthai"
+./uesp-yuminstall "libthai-devel"
+
+pushd wikidiff2
+
+phpize
 RESULT=$?
 
 if [ $RESULT != 0 ]
 then
-	echo "     ERROR: 'make' failed to compile/link WikiDiff2!"
+	echo "     ERROR: 'make' failed to phpize WikiDiff2!"
+	popd
 	exit -1
 fi
 
-make --quiet -C ./wikidiff2 install 2> /dev/null
+./configure
+RESULT=$?
+
+if [ $RESULT != 0 ]
+then
+	echo "     ERROR: 'make' failed to configure WikiDiff2!"
+	popd
+	exit -2
+fi
+
+make --quiet 2> /dev/null
+RESULT=$?
+
+if [ $RESULT != 0 ]
+then
+	echo "     ERROR: 'make' failed to make WikiDiff2!"
+	popd
+	exit -3
+fi
+
+make --quiet install 2> /dev/null
 RESULT=$?
 
 if [ $RESULT != 0 ]
 then
 	echo "     ERROR: 'make' failed to install WikiDiff2!"
-	exit -2
+	popd
+	exit -4
 fi
 
-if [ ! -f /usr/lib64/php/modules/php_wikidiff2.so ]
-then
-	echo "     ERROR: Failed to install the WikiDiff2 PHP extension!"
-	exit -1
-fi
+cp -f ./modules/wikidiff2.so /usr/lib64/php/modules/
 
-cp -f ./wikidiff2/php_wikidiff2.ini /etc/php.d
 RESULT=$?
 
-if [ $RESULT !=  0 ] || [ ! -f /etc/php.d/php_wikidiff2.ini ]
+if [ $RESULT != 0 ]
 then
-	echo "     ERROR: Failed to copy file 'php_wikidiff2.ini' to '/etc/php.d/'!"
-	exit -3
+	echo "     ERROR: Failed to copy wikidiff2 module to module directory!"
+	popd
+	exit -5
+fi
+
+if [ ! -f /usr/lib64/php/modules/wikidiff2.so ]
+then
+	echo "     ERROR: Failed to install the WikiDiff2 PHP extension!"
+	popd
+	exit -6
+fi
+
+cp -f wikidiff2.ini /etc/php.d/
+RESULT=$?
+
+if [ $RESULT !=  0 ] || [ ! -f /etc/php.d/wikidiff2.ini ]
+then
+	echo "     ERROR: Failed to copy file 'wikidiff2.ini' to '/etc/php.d/'!"
+	popd
+	exit -7
 fi
 
 RESULT=`php -m | grep -c -i 'wikidiff2'`
 
 if [ $RESULT -eq 0 ]
 then
-	echo "     ERROR: The wikidiff2 PHP extension is does show up in loaded modules!"
-	exit -4
+	echo "     ERROR: The wikidiff2 PHP extension does show up in loaded modules!"
+	popd
+	exit -8
 fi
 
 echo "     OK: WikiDiff2 PHP extension installed!"
+popd
 exit 0

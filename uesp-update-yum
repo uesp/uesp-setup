@@ -2,14 +2,12 @@
 
 echo "Starting uesp-update-yum..."
 
-# rpm --quiet -Uhv http://apt.sw.be/redhat/el5/en/i386/rpmforge/RPMS/rpmforge-release-0.3.6-1.el5.rf.i386.rpm > /dev/null
-# rpm -Uvh remi-release-6*.rpm epel-release-6*.rpm
-
+./uesp-yuminstall "yum-utils"
 ./uesp-yuminstall "epel-release"
+yum -q -y install http://rpms.remirepo.net/enterprise/remi-release-7.rpm
 
-# Force update of package files
-# yum -q list memcached > /dev/null
-# yum update
+yum-config-manager --enable remi-php56 > /dev/null
+
 ./uesp-update-yumapps
 
 echo "     OK: Successfully updated yum."

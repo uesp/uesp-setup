@@ -51,13 +51,11 @@ get_zabbix_server_ip
 
 ./uesp-setup-common "$UESP_HOSTNAME" "$ZABBIXSERVER"
 ./uesp-install-contentapps
-./uesp-install-modevasive
 
 ./uesp-setup-mounts
 
-mkdir -p /cache
-mkdir -p /uesp-mobile-cache
-chown apache:uespadmin /cache
-chmod g+rwx /cache
-chown apache:uespadmin /uesp-mobile-cache
-chmod g+rwx /uesp-mobile-cache
+./uesp-create-wikicache
+
+mkdir /imagetmp
+chown apache:apache /imagetmp
+

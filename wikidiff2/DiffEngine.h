@@ -13,54 +13,103 @@
 #include <utility>
 #include <algorithm>
 #include <cassert>
+#include <string>
+#include <numeric>
 
 #ifdef USE_JUDY
 #include "JudyHS.h"
 #endif
 
+#include "IntSet.h"
+#include "Wikidiff2.h"
+#include "Word.h"
+#include "textutil.h"
+#ifdef HHVM_BUILD_DSO
+#include "hphp/runtime/base/ini-setting.h"
+#endif //HHVM_BUILD_DSO
+
+// Default value for INI setting wikidiff2.change_threshold
+#define WIKIDIFF2_CHANGE_THRESHOLD_DEFAULT		"0.2"
+// Default value for INI setting wikidiff2.moved_line_threshold
+#define WIKIDIFF2_MOVED_LINE_THRESHOLD_DEFAULT	"0.4"
+// Default value for INI setting wikidiff2.moved_paragraph_detection_cutoff
+#define WIKIDIFF2_MOVED_PARAGRAPH_DETECTION_CUTOFF_DEFAULT "100"
+
+#ifdef DEBUG_MOVED_LINES
+inline void debugLog(const char *fmt, ...) {
+	static FILE *f = nullptr;
+	char ch[2048];
+	va_list ap;
+	va_start(ap, fmt);
+	vsnprintf(ch, sizeof(ch), fmt, ap);
+	va_end(ap);
+	if(!f) f = fopen("/tmp/wd2-debug-log.log", "a");
+	if(!f) throw std::runtime_error("failed to open debug log...");
+	fwrite(ch, 1, strlen(ch), f);
+	fflush(f);
+};
+#else
+#define debugLog(...)
+#endif
+
+
+struct WordDiffStats
+{
+	int charsTotal = 0;
+	int opCharCount[4] = { 0 };
+	double charSimilarity;
+
+	WordDiffStats(TextUtil::WordVector& words1, TextUtil::WordVector& words2, long long bailoutComplexity);
+};
+
 /**
  * Diff operation
- * 
+ *
  * from and to are vectors containing pointers to the objects passed in from_lines and to_lines
  *
  * op is one of the following
- *    copy:    A sequence of lines (in from and to) which are the same in both files. 
+ *    copy:    A sequence of lines (in from and to) which are the same in both files.
  *    del:     A sequence of lines (in from) which were in the first file but not the second.
  *    add:     A sequence of lines (in to) which were in the second file but not the first.
- *    change:  A sequence of lines which are different between the two files. Lines from the 
- *             first file are in from, lines from the second are in to. The two vectors need 
+ *    change:  A sequence of lines which are different between the two files. Lines from the
+ *             first file are in from, lines from the second are in to. The two vectors need
  *             not be the same length.
  */
 template<typename T>
-class DiffOp 
+class DiffOp
 {
 	public:
-		DiffOp(int op_, const std::vector<const T*> & from_, const std::vector<const T*> & to_)
+		typedef std::vector<const T*, WD2_ALLOCATOR<const T*> > PointerVector;
+		DiffOp(int op_, const PointerVector & from_, const PointerVector & to_)
 			: op(op_), from(from_), to(to_) {}
 
 		enum {copy, del, add, change};
 		int op;
-		std::vector<const T*> from;
-		std::vector<const T*> to;
+		PointerVector from;
+		PointerVector to;
 };
 
 /**
- * Basic diff template class. After construction, edits will contain a vector of DiffOp
+ * Basic diff template class. After construction, edits will contain a vector of DiffOpTemplate
  * objects representing the diff
  */
 template<typename T>
 class Diff
 {
 	public:
-		Diff(const std::vector<T> & from_lines, const std::vector<T> & to_lines);
-		
+		typedef std::vector<T, WD2_ALLOCATOR<T> > ValueVector;
+		typedef std::vector<DiffOp<T>, WD2_ALLOCATOR<DiffOp<T>> > DiffOpVector;
+
+		Diff(const ValueVector & from_lines, const ValueVector & to_lines,
+			long long bailoutComplexity = 0);
+
 		virtual void add_edit(const DiffOp<T> & edit) {
-			edits.push_back(edit); 
+			edits.push_back(edit);
 		}
 		unsigned size() { return edits.size(); }
 		DiffOp<T> & operator[](int i) {return edits[i];}
 
-		std::vector<DiffOp<T> > edits;
+		DiffOpVector edits;
 };
 /**
  * Class used internally by Diff to actually compute the diffs.
@@ -76,47 +125,70 @@ class Diff
  * diffutils-2.7, which can be found at:
  *	 ftp://gnudist.gnu.org/pub/gnu/diffutils/diffutils-2.7.tar.gz
  *
- * This implementation is largely due to Geoffrey T. Dairiki, who wrote this 
- * diff engine for phpwiki 1-3.3. It was then adopted by MediaWiki. 
+ * This implementation is largely due to Geoffrey T. Dairiki, who wrote this
+ * diff engine for phpwiki 1-3.3. It was then adopted by MediaWiki.
  *
  * Finally, it was ported to C++ by Tim Starling in February 2006
  *
  * @access private
- * @package MediaWiki
- * @subpackage DifferenceEngine
  */
 
 template<typename T>
-class _DiffEngine 
+class DiffEngine
 {
 	public:
-		_DiffEngine() : done(false) {}
+		// Vectors
+		typedef std::vector<bool> BoolVector; // skip the allocator here to get the specialisation
+		typedef std::vector<const T*, WD2_ALLOCATOR<const T*> > PointerVector;
+		typedef std::vector<T, WD2_ALLOCATOR<T> > ValueVector;
+		typedef std::vector<int, WD2_ALLOCATOR<int> > IntVector;
+		typedef std::vector<std::pair<int, int>, WD2_ALLOCATOR<std::pair<int, int> > > IntPairVector;
+
+		// Maps
+#ifdef USE_JUDY
+		typedef JudyHS<IntVector> MatchesMap;
+#else
+		typedef std::map<T, IntVector, std::less<T>, WD2_ALLOCATOR<std::pair<const T, IntVector>>> MatchesMap;
+#endif
+
+		// Sets
+#ifdef USE_JUDY
+		typedef JudySet ValueSet;
+#else
+		typedef std::set<T, std::less<T>, WD2_ALLOCATOR<T> > ValueSet;
+#endif
+
+		DiffEngine() : done(false) {}
 		void clear();
-		void diff (const std::vector<T> & from_lines, 
-				const std::vector<T> & to_lines, Diff<T> & diff);
-		int _lcs_pos (int ypos);
-		void _compareseq (int xoff, int xlim, int yoff, int ylim);
-		void _shift_boundaries (const std::vector<T> & lines, std::vector<bool> & changed, 
-				const std::vector<bool> & other_changed);
+		void diff (const ValueVector & from_lines,
+				const ValueVector & to_lines, Diff<T> & diff,
+				long long bailoutComplexity = 0);
+		int lcs_pos (int ypos);
+		void compareseq (int xoff, int xlim, int yoff, int ylim);
+		void shift_boundaries (const ValueVector & lines, BoolVector & changed,
+				const BoolVector & other_changed);
 	protected:
-		int _diag (int xoff, int xlim, int yoff, int ylim, int nchunks, 
-				std::vector<std::pair<int, int> > & seps);
-		
-		std::vector<bool> xchanged, ychanged;
-		std::vector<const T*> xv, yv;
-		std::vector<int> xind, yind;
-		std::map<int, int> seq;
-		std::set<int> in_seq;
+		int diag (int xoff, int xlim, int yoff, int ylim, int nchunks,
+				IntPairVector & seps);
+
+		BoolVector xchanged, ychanged;
+		PointerVector xv, yv;
+		IntVector xind, yind;
+		IntVector seq;
+		IntSet in_seq;
 		int lcs;
 		bool done;
 		enum {MAX_CHUNKS=8};
+		void detectDissimilarChanges(PointerVector& del, PointerVector& add, Diff<T>& diff, long long bailoutComplexity);
+		bool looksLikeChange(const T& del, const T& add, long long bailoutComplexity);
+		void writeChange(Diff<T>& diff, PointerVector& del, PointerVector& add, const PointerVector& empty);
 };
 
 //-----------------------------------------------------------------------------
-// _DiffEngine implementation
+// DiffEngine implementation
 //-----------------------------------------------------------------------------
 template<typename T>
-void _DiffEngine<T>::clear() 
+void DiffEngine<T>::clear()
 {
 	xchanged.clear();
 	ychanged.clear();
@@ -129,9 +201,105 @@ void _DiffEngine<T>::clear()
 	done = false;
 }
 
+inline double characterSimilarityThreshold()
+{
+#ifdef HHVM_BUILD_DSO
+	// HHVM module
+	HPHP::Variant value(WIKIDIFF2_CHANGE_THRESHOLD_DEFAULT);
+	HPHP::IniSetting::Get(std::string("wikidiff2.change_threshold"), value);
+	return value.toDouble();
+#else
+	// Zend module
+	double ret = INI_FLT("wikidiff2.change_threshold");
+	return ret;
+#endif //HHVM_BUILD_DSO
+}
+
+inline double movedLineThreshold()
+{
+#ifdef HHVM_BUILD_DSO
+	// HHVM module
+	HPHP::Variant value(WIKIDIFF2_MOVED_LINE_THRESHOLD_DEFAULT);
+	HPHP::IniSetting::Get(std::string("wikidiff2.moved_line_threshold"), value);
+	return value.toDouble();
+#else
+	// Zend module
+	double ret = INI_FLT("wikidiff2.moved_line_threshold");
+	return ret;
+#endif //HHVM_BUILD_DSO
+}
+
+inline int movedParagraphDetectionCutoff()
+{
+#ifdef HHVM_BUILD_DSO
+	// HHVM module
+	HPHP::Variant value(WIKIDIFF2_MOVED_PARAGRAPH_DETECTION_CUTOFF_DEFAULT);
+	HPHP::IniSetting::Get(std::string("wikidiff2.moved_paragraph_detection_cutoff"), value);
+	return value.toInt32();
+#else
+	// Zend module
+	int ret = INI_INT("wikidiff2.moved_paragraph_detection_cutoff");
+	return ret;
+#endif //HHVM_BUILD_DSO
+}
+
+// for a DiffOp::change, decide whether it should be treated as a successive add and delete based on similarity.
 template<typename T>
-void _DiffEngine<T>::diff (const std::vector<T> & from_lines, 
-		const std::vector<T> & to_lines, Diff<T> & diff) 
+inline bool DiffEngine<T>::looksLikeChange(const T& del, const T& add, long long bailoutComplexity)
+{
+	TextUtil::WordVector words1, words2;
+	TextUtil::explodeWords(del, words1);
+	TextUtil::explodeWords(add, words2);
+	WordDiffStats ds(words1, words2, bailoutComplexity);
+	return ds.charSimilarity > characterSimilarityThreshold();
+}
+
+// go through list of changed lines. if they are too dissimilar, convert to del+add.
+template<typename T>
+inline void DiffEngine<T>::detectDissimilarChanges(PointerVector& del, PointerVector& add, Diff<T>& diff, long long bailoutComplexity)
+{
+	int i;
+	static PointerVector empty;
+	for (i = 0; i < del.size() && i < add.size(); ++i) {
+		if (!looksLikeChange(*del[i], *add[i], bailoutComplexity)) {
+			if (i > 0) {
+				// Turn all "add" and "del" operations that have been detected as "looksLikeChange"
+				// so far into a single combined "change" operation in the resulting diff.
+				PointerVector d, a;
+				for (int k = 0; k < i; ++k) {
+					d.push_back(del[k]);
+					a.push_back(add[k]);
+				}
+				diff.add_edit(DiffOp<T>(DiffOp<T>::change, d, a));
+				add.erase(add.begin(), add.begin() + i);
+				del.erase(del.begin(), del.begin() + i);
+				// All elements [0..i - 1] got removed, which moves element i to position 0.
+				i = 0;
+			}
+
+			// convert dissimilar piece to delete + add
+			PointerVector d, a;
+			d.push_back(del[i]);
+			a.push_back(add[i]);
+			diff.add_edit(DiffOp<T>(DiffOp<T>::add, empty, a));
+			diff.add_edit(DiffOp<T>(DiffOp<T>::del, d, empty));
+			add.erase(add.begin() + i);
+			del.erase(del.begin() + i);
+			--i;
+		}
+	}
+}
+
+template<>
+inline void DiffEngine<Word>::detectDissimilarChanges(PointerVector& del, PointerVector& add, Diff<Word>& diff, long long bailoutComplexity)
+{
+	// compiles to no-op in Word specialization.
+}
+
+template<typename T>
+void DiffEngine<T>::diff (const ValueVector & from_lines,
+		const ValueVector & to_lines, Diff<T> & diff,
+		long long bailoutComplexity /* = 0 */)
 {
 	int n_from = (int)from_lines.size();
 	int n_to = (int)to_lines.size();
@@ -139,9 +307,10 @@ void _DiffEngine<T>::diff (const std::vector<T> & from_lines,
 	// If this diff engine has been used before for a diff, clear the member variables
 	if (done) {
 		clear();
-	} 
+	}
 	xchanged.resize(n_from);
 	ychanged.resize(n_to);
+	seq.resize(std::max(n_from, n_to) + 1);
 
 	// Skip leading common lines.
 	int skip, endskip;
@@ -158,12 +327,28 @@ void _DiffEngine<T>::diff (const std::vector<T> & from_lines,
 		xchanged[xi] = ychanged[yi] = false;
 	}
 
+	long long complexity = (long long)(n_from - skip - endskip)
+		* (n_to - skip - endskip);
+
+	// If too complex, just output "whole left side replaced with right"
+	if (bailoutComplexity > 0 && complexity > bailoutComplexity) {
+		PointerVector del;
+		PointerVector add;
+
+		for (xi = 0; xi < n_from; xi++) {
+			del.push_back(&from_lines[xi]);
+		}
+		for (yi = 0; yi < n_to; yi++) {
+			add.push_back(&to_lines[yi]);
+		}
+		diff.add_edit(DiffOp<T>(DiffOp<T>::change, del, add));
+
+		done = true;
+		return;
+	}
+
 	// Ignore lines which do not exist in both files.
-#ifdef USE_JUDY
-	JudySet xhash, yhash;
-#else
-	std::set<T> xhash, yhash;
-#endif
+	ValueSet xhash, yhash;
 	for (xi = skip; xi < n_from - endskip; xi++) {
 		xhash.insert(from_lines[xi]);
 	}
@@ -173,7 +358,7 @@ void _DiffEngine<T>::diff (const std::vector<T> & from_lines,
 		if ( (ychanged[yi] = (xhash.find(line) == xhash.end())) )
 			continue;
 		yhash.insert(line);
-		yv.push_back(&line);		
+		yv.push_back(&line);
 		yind.push_back(yi);
 	}
 	for (xi = skip; xi < n_from - endskip; xi++) {
@@ -185,11 +370,11 @@ void _DiffEngine<T>::diff (const std::vector<T> & from_lines,
 	}
 
 	// Find the LCS.
-	_compareseq(0, xv.size(), 0, yv.size());
+	compareseq(0, xv.size(), 0, yv.size());
 
 	// Merge edits when possible
-	_shift_boundaries(from_lines, xchanged, ychanged);
-	_shift_boundaries(to_lines, ychanged, xchanged);
+	shift_boundaries(from_lines, xchanged, ychanged);
+	shift_boundaries(to_lines, ychanged, xchanged);
 
 	// Compute the edit operations.
 	xi = yi = 0;
@@ -198,9 +383,9 @@ void _DiffEngine<T>::diff (const std::vector<T> & from_lines,
 		assert(xi < n_from || ychanged[yi]);
 
 		// Skip matching "snake".
-		std::vector<const T*> del;
-		std::vector<const T*> add;
-		std::vector<const T*> empty;
+		PointerVector del;
+		PointerVector add;
+		PointerVector empty;
 		while (xi < n_from && yi < n_to && !xchanged[xi] && !ychanged[yi]) {
 			del.push_back(&from_lines[xi]);
 			add.push_back(&to_lines[yi]);
@@ -220,9 +405,11 @@ void _DiffEngine<T>::diff (const std::vector<T> & from_lines,
 		while (yi < n_to && ychanged[yi])
 			add.push_back(&to_lines[yi++]);
 
-		if (del.size() && add.size())
-			diff.add_edit(DiffOp<T>(DiffOp<T>::change, del, add));
-		else if (del.size())
+		detectDissimilarChanges(del, add, diff, bailoutComplexity);
+
+		if (del.size() && add.size()) {
+			writeChange(diff, del, add, empty);
+		} else if (del.size())
 			diff.add_edit(DiffOp<T>(DiffOp<T>::del, del, empty));
 		else if (add.size())
 			diff.add_edit(DiffOp<T>(DiffOp<T>::add, empty, add));
@@ -230,6 +417,33 @@ void _DiffEngine<T>::diff (const std::vector<T> & from_lines,
 
 	done = true;
 }
+
+template<class T>
+inline void DiffEngine<T>::writeChange(Diff<T>& diff, PointerVector& del, PointerVector& add, const PointerVector& empty)
+{
+	if ( del.size() == add.size() ) {
+		diff.add_edit(DiffOp<T>(DiffOp<T>::change, del, add));
+	} else {
+		// this is a change containing added and deleted lines; convert them to the right DiffOps so the
+		// moved paragraph detection code gets a chance to see them
+		size_t commonSize = std::min(del.size(), add.size());
+		PointerVector changeDel(del.begin(), del.begin() + commonSize);
+		PointerVector changeAdd(add.begin(), add.begin() + commonSize);
+		diff.add_edit(DiffOp<T>(DiffOp<T>::change, changeDel, changeAdd));
+		if (del.size() > commonSize)
+			diff.add_edit(DiffOp<T>(DiffOp<T>::del, PointerVector(del.begin() + commonSize, del.end()), empty));
+		if (add.size() > commonSize)
+			diff.add_edit(DiffOp<T>(DiffOp<T>::add, empty, PointerVector(add.begin() + commonSize, add.end())));
+	}
+}
+
+template<>
+inline void DiffEngine<Word>::writeChange(Diff<Word>& diff, PointerVector& del, PointerVector& add, const PointerVector& empty)
+{
+	diff.add_edit(DiffOp<Word>(DiffOp<Word>::change, del, add));
+}
+
+
 
 /* Divide the Largest Common Subsequence (LCS) of the sequences
  * [XOFF, XLIM) and [YOFF, YLIM) into NCHUNKS approximately equally
@@ -248,20 +462,14 @@ void _DiffEngine<T>::diff (const std::vector<T> & from_lines,
  * of the portions it is going to specify.
  */
 template <typename T>
-int _DiffEngine<T>::_diag (int xoff, int xlim, int yoff, int ylim, int nchunks, 
-		std::vector<std::pair<int, int> > & seps) 
+int DiffEngine<T>::diag (int xoff, int xlim, int yoff, int ylim, int nchunks,
+		IntPairVector & seps)
 {
-	using std::vector;
 	using std::swap;
 	using std::make_pair;
-	using std::map;
 	using std::copy;
 	bool flip = false;
-#ifdef USE_JUDY
-	JudyHS<vector<int> > ymatches;
-#else
-	map<T, vector<int> > ymatches;
-#endif
+	MatchesMap ymatches;
 
 	if (xlim - xoff > ylim - yoff) {
 		// Things seems faster (I'm not sure I understand why)
@@ -284,36 +492,36 @@ int _DiffEngine<T>::_diag (int xoff, int xlim, int yoff, int ylim, int nchunks,
 	in_seq.clear();
 
 	// 2-d array, line major, chunk minor
-	vector<int> ymids(nlines * nchunks);
+	IntVector ymids(nlines * nchunks);
 
 	int numer = xlim - xoff + nchunks - 1;
 	int x = xoff, x1, y1;
 	for (int chunk = 0; chunk < nchunks; chunk++) {
 		if (chunk > 0)
-			for (int i = 0; i <= lcs; i++) 
+			for (int i = 0; i <= lcs; i++)
 				ymids.at(i * nchunks + chunk-1) = seq[i];
 
 		x1 = xoff + (int)((numer + (xlim-xoff)*chunk) / nchunks);
 		for ( ; x < x1; x++) {
 			const T & line = flip ? *yv[x] : *xv[x];
 #ifdef USE_JUDY
-			vector<int> * pMatches = ymatches.Get(line);
+			IntVector * pMatches = ymatches.Get(line);
 			if (!pMatches)
 				continue;
 #else
-			typename map<T, vector<int> >::iterator iter = ymatches.find(line);
+			typename MatchesMap::iterator iter = ymatches.find(line);
 			if (iter == ymatches.end())
 				continue;
-			vector<int> * pMatches = &(iter->second);
+			IntVector * pMatches = &(iter->second);
 #endif
-			vector<int>::iterator y;
+			IntVector::iterator y;
 			int k = 0;
-			
+
 			for (y = pMatches->begin(); y != pMatches->end(); ++y) {
-				if (!in_seq.count(*y)) {
-					k = _lcs_pos(*y);
+				if (!in_seq.contains(*y)) {
+					k = lcs_pos(*y);
 					assert(k > 0);
-					copy(ymids.begin() + (k-1) * nchunks, ymids.begin() + k * nchunks, 
+					copy(ymids.begin() + (k-1) * nchunks, ymids.begin() + k * nchunks,
 							ymids.begin() + k * nchunks);
 					++y;
 					break;
@@ -327,10 +535,10 @@ int _DiffEngine<T>::_diag (int xoff, int xlim, int yoff, int ylim, int nchunks,
 					in_seq.erase(seq[k]);
 					seq[k] = *y;
 					in_seq.insert(*y);
-				} else if (!in_seq.count(*y)) {
-					k = _lcs_pos(*y);
+				} else if (!in_seq.contains(*y)) {
+					k = lcs_pos(*y);
 					assert(k > 0);
-					copy(ymids.begin() + (k-1) * nchunks, ymids.begin() + k * nchunks, 
+					copy(ymids.begin() + (k-1) * nchunks, ymids.begin() + k * nchunks,
 							ymids.begin() + k * nchunks);
 				}
 			}
@@ -339,9 +547,9 @@ int _DiffEngine<T>::_diag (int xoff, int xlim, int yoff, int ylim, int nchunks,
 
 	seps.clear();
 	seps.resize(nchunks + 1);
-	
+
 	seps[0] = flip ? make_pair(yoff, xoff) : make_pair(xoff, yoff);
-	vector<int>::iterator ymid = ymids.begin() + lcs * nchunks;
+	IntVector::iterator ymid = ymids.begin() + lcs * nchunks;
 	for (int n = 0; n < nchunks - 1; n++) {
 		x1 = xoff + (numer + (xlim - xoff) * n) / nchunks;
 		y1 = ymid[n] + 1;
@@ -352,7 +560,7 @@ int _DiffEngine<T>::_diag (int xoff, int xlim, int yoff, int ylim, int nchunks,
 }
 
 template <typename T>
-int _DiffEngine<T>::_lcs_pos (int ypos) {
+int DiffEngine<T>::lcs_pos (int ypos) {
 	int end = lcs;
 	if (end == 0 || ypos > seq[end]) {
 		seq[++lcs] = ypos;
@@ -389,13 +597,12 @@ int _DiffEngine<T>::_lcs_pos (int ypos) {
  * All line numbers are origin-0 and discarded lines are not counted.
  */
 template <typename T>
-void _DiffEngine<T>::_compareseq (int xoff, int xlim, int yoff, int ylim) {
-	using std::vector;
+void DiffEngine<T>::compareseq (int xoff, int xlim, int yoff, int ylim) {
 	using std::pair;
 
-	vector<pair<int, int> > seps;
+	IntPairVector seps;
 	int lcs;
-	
+
 	// Slide down the bottom initial diagonal.
 	while (xoff < xlim && yoff < ylim && *xv[xoff] == *yv[yoff]) {
 		++xoff;
@@ -415,7 +622,7 @@ void _DiffEngine<T>::_compareseq (int xoff, int xlim, int yoff, int ylim) {
 		//nchunks = sqrt(min(xlim - xoff, ylim - yoff) / 2.5);
 		//nchunks = max(2,min(8,(int)nchunks));
 		int nchunks = std::min(MAX_CHUNKS-1, std::min(xlim - xoff, ylim - yoff)) + 1;
-		lcs = _diag(xoff, xlim, yoff, ylim, nchunks, seps);
+		lcs = diag(xoff, xlim, yoff, ylim, nchunks, seps);
 	}
 
 	if (lcs == 0) {
@@ -427,10 +634,10 @@ void _DiffEngine<T>::_compareseq (int xoff, int xlim, int yoff, int ylim) {
 			xchanged[xind[xoff++]] = true;
 	} else {
 		// Use the partitions to split this problem into subproblems.
-		vector<pair<int, int> >::iterator pt1, pt2;
+		IntPairVector::iterator pt1, pt2;
 		pt1 = pt2 = seps.begin();
 		while (++pt2 != seps.end()) {
-			_compareseq (pt1->first, pt2->first, pt1->second, pt2->second);
+			compareseq (pt1->first, pt2->first, pt1->second, pt2->second);
 			pt1 = pt2;
 		}
 	}
@@ -449,8 +656,8 @@ void _DiffEngine<T>::_compareseq (int xoff, int xlim, int yoff, int ylim) {
  * This is extracted verbatim from analyze.c (GNU diffutils-2.7).
  */
 template <typename T>
-void _DiffEngine<T>::_shift_boundaries (const std::vector<T> & lines, std::vector<bool> & changed, 
-		const std::vector<bool> & other_changed) 
+void DiffEngine<T>::shift_boundaries (const ValueVector & lines, BoolVector & changed,
+		const BoolVector & other_changed)
 {
 	int i = 0;
 	int j = 0;
@@ -555,10 +762,50 @@ void _DiffEngine<T>::_shift_boundaries (const std::vector<T> & lines, std::vecto
 //-----------------------------------------------------------------------------
 
 template<typename T>
-Diff<T>::Diff(const std::vector<T> & from_lines, const std::vector<T> & to_lines)
+Diff<T>::Diff(const ValueVector & from_lines, const ValueVector & to_lines,
+	long long bailoutComplexity)
 {
-	_DiffEngine<T> engine;
-	engine.diff(from_lines, to_lines, *this);
+	DiffEngine<T> engine;
+	engine.diff(from_lines, to_lines, *this, bailoutComplexity);
 }
+
+inline WordDiffStats::WordDiffStats(TextUtil::WordVector& words1, TextUtil::WordVector& words2, long long bailoutComplexity)
+{
+	auto countOpChars = [] (DiffEngine<Word>::PointerVector& p) {
+		return std::accumulate(p.begin(), p.end(), 0, [] (int a, const Word *b) {
+			return a + (b->suffixEnd - b->bodyStart);
+		});
+	};
+
+	Diff<Word> diff(words1, words2, bailoutComplexity);
+	for (int i = 0; i < diff.size(); ++i) {
+		int op = diff[i].op;
+		int charCount;
+		switch (op) {
+			case DiffOp<Word>::del:
+			case DiffOp<Word>::copy:
+				charCount = countOpChars(diff[i].from);
+				break;
+			case DiffOp<Word>::add:
+				charCount = countOpChars(diff[i].to);
+				break;
+			case DiffOp<Word>::change:
+				charCount = std::max(countOpChars(diff[i].from), countOpChars(diff[i].to));
+				break;
+		}
+		opCharCount[op] += charCount;
+		charsTotal += charCount;
+	}
+	if (opCharCount[DiffOp<Word>::copy] == 0) {
+		charSimilarity = 0.0;
+	} else {
+		if (charsTotal) {
+			charSimilarity = double(opCharCount[DiffOp<Word>::copy]) / charsTotal;
+		} else {
+			charSimilarity = 0.0;
+		}
+	}
+}
+
 
 #endif

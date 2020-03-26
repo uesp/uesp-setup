@@ -2,65 +2,69 @@
 
 echo "Starting uesp-install-denyhosts..."
 
-pushd . > /dev/null
-cd denyhosts
+./uesp-yuminstall "python"
+./uesp-yuminstall "python-ipaddr"
 
-python setup.py install > /dev/null
+pushd denyhosts > /dev/null
+
+python setup.py install
 RESULT=$?
 
 if [ $RESULT != 0 ]
 then
 	echo "     ERROR: Failed to install the DenyHosts Python application!"
-	exit -1
-fi
-
-cp -f /usr/share/denyhosts/denyhosts.cfg-dist /usr/share/denyhosts/denyhosts.cfg
-RESULT=$?
-
-if [ $RESULT != 0 ]
-then
-	echo "     ERROR: Failed to create the DenyHosts configuration file!"
+	popd
 	exit -1
 fi
 
 HOSTNAME=`hostname`
-sed -i -e"s/denyhosts@localhost/denyhosts@$HOSTNAME/" /usr/share/denyhosts/denyhosts.cfg
+sed -i -e"s/^PURGE_DENY =.*/PURGE_DENY = 2w/" /etc/denyhosts.conf
+
+if [ $? != 0 ]
+then
+	echo "     WARNING: Failed to modify denyhosts PURGE_DENY setting!"
+fi
+
+sed -i -e"s/nobody@localhost/denyhosts@$HOSTNAME/" /etc/denyhosts.conf
 
 if [ $? != 0 ]
 then
 	echo "     WARNING: Failed to modify denyhosts send e-mail address!"
 fi
 
-cp -f /usr/share/denyhosts/daemon-control-dist /usr/share/denyhosts/daemon-control
+mv -f /usr/bin/daemon-control-dist /usr/bin/denyhosts-daemon-control
 RESULT=$?
 
 if [ $RESULT != 0 ]
 then
 	echo "     ERROR: Failed to create the DenyHosts daemon file!"
+	popd
 	exit -2
 fi
 
-chown root /usr/share/denyhosts/daemon-control
+chown root /usr/bin/denyhosts-daemon-control
 RESULT=$?
 
 if [ $RESULT != 0 ]
 then
 	echo "     ERROR: Failed to change the owner of the DenyHosts daemon-control file!"
+	popd
 	exit -3
 fi
 
-chmod 700 /usr/share/denyhosts/daemon-control
+chmod 700 /usr/bin/denyhosts-daemon-control
 RESULT=$?
 
 if [ $RESULT != 0 ]
 then
 	echo "     ERROR: Failed to change the permissions of the DenyHosts daemon-control file!"
+	popd
 	exit -4
 fi
 
 if [ ! -d /var/log/denyhosts ]
 then
-	mkdir /var/log/denyhosts
+	mkdir -p /var/log/denyhosts
 	RESULT=$?
 
 	if [ $RESULT != 0 ]
@@ -69,38 +73,45 @@ then
 	fi
 fi
 
-ln -f -s /usr/share/denyhosts/daemon-control /etc/init.d/denyhosts
+sed -i "s/^DAEMON_LOG =.*/DAEMON_LOG = \/var\/log\/denyhosts\/denyhosts.log/g" /etc/denyhosts.conf
+
+ln -fs /usr/bin/denyhosts-daemon-control /etc/init.d/denyhosts
 RESULT=$?
 
 if [ $RESULT != 0 ]
 then
 	echo "     ERROR: Failed to add DenyHosts startup script to '/etc/init.d/'!"
+	popd
 	exit -5
 fi
 
-/sbin/chkconfig --add denyhosts
+ln -fs /usr/bin/denyhosts.py /usr/sbin/denyhosts
 RESULT=$?
 
 if [ $RESULT != 0 ]
 then
-	echo "     ERROR: Failed to add DenyHosts startup script using chkconfig!"
+	echo "     ERROR: Failed to create /usr/sbin/denyhosts entry!"
+	popd
+	exit -5
+fi
+
+systemctl enable denyhosts
+RESULT=$?
+
+if [ $RESULT != 0 ]
+then
+	echo "     ERROR: Failed to add DenyHosts startup script using systemctl!"
+	popd
 	exit -6
 fi
 
-ln -fs /usr/share/denyhosts/denyhosts.cfg /etc/denyhosts.cfg
-RESULT=$?
-
-if [ $RESULT != 0 ]
-then
-	echo "     ERROR: Failed to create link to denyhosts.cfg in /etc/!"
-fi
-
-/etc/init.d/denyhosts restart > /dev/null
+systemctl start denyhosts
 RESULT=$?
 
 if [ $RESULT != 0 ]
 then
 	echo "     ERROR: Failed to start DenyHosts!"
+	popd
 	exit -8
 fi
 

@@ -1,21 +1,5 @@
 #!/bin/sh
 
-echo "Install mod_evasive for Apache 2.0..."
+echo "Installing mod_evasive for Apache 2.4..."
 
-./uesp-yuminstall httpd-devel
-
-cd ./mod_evasive
-
-apxs -i -a -c mod_evasive20.c
-RESULT=$?
-
-cd ..
-
-if [ $RESULT != 0 ]; then
-	echo "     ERROR: Failed to install mod_evasive!"
-	exit -1
-fi
-
-/etc/init.d/httpd restart
-exit 0
-
+./uesp-yuminstall "mod_evasive"

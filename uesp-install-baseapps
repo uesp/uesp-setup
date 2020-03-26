@@ -1,13 +1,14 @@
 #!/bin/sh
 
-echo "Starting uesp-install-baseapps..."
+echo "Starting base app installation..."
 
 ./uesp-install-hg
+./uesp-install-git
+
 ./uesp-yuminstall "at"
 ./uesp-yuminstall "vsftpd"
 ./uesp-yuminstall "libmcrypt"
 ./uesp-yuminstall "libtool-ltdl"
-./uesp-yuminstall "swig"
 ./uesp-yuminstall "gcc"
 ./uesp-yuminstall "gcc-c++"
 ./uesp-yuminstall "ntp"
@@ -15,9 +16,19 @@ echo "Starting uesp-install-baseapps..."
 ./uesp-yuminstall "re2c"
 ./uesp-yuminstall "curl"
 ./uesp-yuminstall "libcurl-devel"
+./uesp-yuminstall "bind-utils"
 
-/etc/init.d/atd start
-/etc/init.d/ntpd start
+./uesp-yuminstall "python"
+./uesp-yuminstall "MySQL-python"
+
+# ./uesp-yuminstall "swig"   # ???
+
+systemctl enable atd
+systemctl enable ntpd
+
+systemctl start atd
+systemctl start ntpd
+
 
 
 

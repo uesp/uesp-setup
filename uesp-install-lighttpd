@@ -2,6 +2,7 @@
 
 echo "Starting uesp-install-lighttpd..."
 
+./uesp-yuminstall "fail2ban"
 ./uesp-yuminstall "lighttpd"
 
 mkdir -p /var/cache/lighttpd/compress
@@ -23,47 +24,14 @@ then
 	exit -3
 fi
 
-cp -f ./lighttpd/lighttpd.conf /etc/lighttpd
+systemctl enable lighttpd
 
 if [ $? != 0 ]
 then
-	echo "     ERROR: Failed to copy lighttpd.conf!"
-	exit -4
-fi
-
-cp -f ./lighttpd/modules.conf /etc/lighttpd
-
-if [ $? != 0 ]
-then
-	echo "     ERROR: Failed to copy modules.conf!"
-	exit -5
-fi
-
-cp -f ./lighttpd/vhosts/* /etc/lighttpd/vhosts.d
-
-if [ $? != 0 ]
-then
-	echo "     ERROR: Failed to copy vhosts configurations!"
-	exit -6
-fi
-
-cp -f ./lighttpd/compress.conf /etc/lighttpd/conf.d
-
-if [ $? != 0 ]
-then
-	echo "     ERROR: Failed to copy compress.conf!"
-	exit -7
-fi
-
-/sbin/chkconfig --levels=345 lighttpd on
-
-if [ $? != 0 ]
-then
-	echo "     ERROR: Failed to update runlevel information for lighttpd!"
+	echo "     ERROR: Failed to update systemctl information for lighttpd!"
 	exit -8
 fi
 
-/etc/init.d/lighttpd restart
-
 echo "     OK: Successfully installed lighttpd."
+echo "   Note: Config *not* copied!"
 exit 0

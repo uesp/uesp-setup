@@ -1,4 +1,0 @@
-#!/bin/sh
-
-(sleep 0.5 | echo "stats") | nc content1.uesp.net 11000 | grep "$1" | awk '{print $3}'
-# cat memcached.stats
