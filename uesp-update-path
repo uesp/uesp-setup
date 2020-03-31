@@ -69,12 +69,10 @@ modify_path()
 modify_path "/root/.bash_profile" "/sbin"
 modify_path "/root/.bash_profile" "/usr/sbin"
 modify_path "/root/.bash_profile" "/usr/local/sbin"
+modify_path "/root/.bash_profile" "/home/uesp/scripts/"
 
 modify_path "/home/dave/.bash_profile" "/sbin"
 modify_path "/home/dave/.bash_profile" "/usr/sbin"
 modify_path "/home/dave/.bash_profile" "/usr/local/sbin"
-
-modify_path "/home/sshadmin/.bash_profile" "/sbin"
-modify_path "/home/sshadmin/.bash_profile" "/usr/sbin"
-modify_path "/home/sshadmin/.bash_profile" "/usr/local/sbin"
+modify_path "/home/dave/.bash_profile" "/home/uesp/scripts/"
 

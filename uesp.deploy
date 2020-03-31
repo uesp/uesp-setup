@@ -1,0 +1,24 @@
+
+name = uesp.setup
+description = Collection of scripts to help setup a new UESP server
+repository = 
+backup = false
+backuppath = /deploytmp/
+verbosity = 0
+
+ignore = *.deploy
+ignore = .hg*
+
+dest = content1.uesp.net:/uesp.setup/
+dest = content2.uesp.net:/uesp.setup/
+dest = content3.uesp.net:/uesp.setup/
+dest = files1.uesp.net:/uesp.setup/
+dest = db1.uesp.net:/uesp.setup/
+dest = db2.uesp.net:/uesp.setup/
+dest = squid1.uesp.net:/uesp.setup/
+dest = backup1.uesp.net:/uesp.setup/
+
+chown_source = :uespadmin -R *
+
+chmod_dest = g+rw {dest}/*
+

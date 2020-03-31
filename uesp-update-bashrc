@@ -2,13 +2,14 @@
 
 PREFIX="$1"
 PROMPT="\[\e]0;\u@$PREFIX\h \w\a\]\n[\u@$PREFIX\h \W]\$ "
+ROOTPROMPT="\[\e]0;\u@$PREFIX\h \w\a\]\n[\u@$PREFIX\h \W]\# "
 
 sed -i '/^export PS1=/d' /root/.bashrc
 sed -i '/^export PS1=/d' /home/dave/.bashrc
 
-echo "export PS1='$PROMPT'" >> /root/.bashrc
+echo "export PS1='$ROOTPROMPT'" >> /root/.bashrc
 echo "export PS1='$PROMPT'" >> /home/dave/.bashrc
 
-export PS1='$PROMPT'
+export PS1='$ROOTPROMPT'
 
 echo "     Updated bash prompt."

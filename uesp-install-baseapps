@@ -17,6 +17,7 @@ echo "Starting base app installation..."
 ./uesp-yuminstall "curl"
 ./uesp-yuminstall "libcurl-devel"
 ./uesp-yuminstall "bind-utils"
+./uesp0yuminstall "time"
 
 ./uesp-yuminstall "python"
 ./uesp-yuminstall "MySQL-python"

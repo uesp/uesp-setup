@@ -27,6 +27,8 @@ yum-config-manager --enable remi-php56 > /dev/null
 ./uesp-yuminstall "php-snmp"
 ./uesp-yuminstall "php-xml"
 
+./uesp-yuminstall "gnuplot"
+
 ./uesp-yuminstall "pkgconfig"
 
 # ./uesp-yuminstall "perl"
