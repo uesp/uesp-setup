@@ -4,6 +4,24 @@
 
 yum-config-manager --enable remi-php56 > /dev/null
 
+	# For ffmpeg
+rpm --import http://li.nux.ro/download/nux/RPM-GPG-KEY-nux.ro
+rpm -Uvh http://li.nux.ro/download/nux/dextop/el7/x86_64/nux-dextop-release-0-5.el7.nux.noarch.rpm
+./uesp-yuminstall "ffmpeg"
+./uesp-yuminstall "ffmpeg-devel"
+./uesp-yuminstall "ffmpeg2theora"
+
+	# Custom ffmpeg install...not tested
+echo "WARNING: Installing untested ffmpeg..."	
+pushd /home/uesp/
+wget https://johnvansickle.com/ffmpeg/builds/ffmpeg-git-amd64-static.tar.xz
+tar xvf ffmpeg-git-amd64-static.tar.xz
+mv -f ffmpeg-fit-amd64-static ffmpeg
+chown uesp:uespadmin /home/uesp/ffmpeg/
+chmod g+rwx /home/uesp/ffmpeg/
+popd
+echo "Finished installing untested ffmpeg!"
+ 
 ./uesp-yuminstall "php"
 ./uesp-yuminstall "php-bcmath"
 ./uesp-yuminstall "php-cli"
