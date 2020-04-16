@@ -2,7 +2,7 @@
 
 PREFIX="$1"
 PROMPT="\[\e]0;\u@$PREFIX\h \w\a\]\n[\u@$PREFIX\h \W]\$ "
-ROOTPROMPT="\[\e]0;\u@$PREFIX\h \w\a\]\n[\u@$PREFIX\h \W]\# "
+ROOTPROMPT="\[\e]0;\u@$PREFIX\h \w\a\]\n[\u@$PREFIX\h \W]# "
 
 sed -i '/^export PS1=/d' /root/.bashrc
 sed -i '/^export PS1=/d' /home/dave/.bashrc

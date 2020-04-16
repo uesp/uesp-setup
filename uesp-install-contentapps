@@ -68,3 +68,8 @@ systemctl enable httpd
 
 ./uesp-install-wikidiff2
 
+	# Ensure that any extra Apache logging has access to the log directory
+mkdir -fp /var/log/httpd/
+chown apache:apache -R /var/log/httpd
+chmod a+rx /var/log
+
