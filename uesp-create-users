@@ -143,6 +143,7 @@ add_user_to_group()
 
 create_group "uespadmin" 522
 create_group "uespforum" 521
+create_user "opendkim"    495
 create_user "varnish"     496
 create_user "nginx"       497
 create_user "lighttpd"    498
@@ -166,12 +167,14 @@ create_user "zabbix"      535
 create_user "robinhood"   536
 create_user "alfwyn"      537
 create_user "jakatackka"  538
+create_user "kiz"         539
 create_user "egd"         610
 create_user "avron"       700
 create_user "steve"       701
 create_user "viud"        702
 create_user "jeremy"      703
 create_user "teamspeak"   704
+create_user "TamrielRebuilt" 705
 
 # Old users/groups no longer in use
 # create_user "sshbackup"   520
