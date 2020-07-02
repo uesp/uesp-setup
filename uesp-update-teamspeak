@@ -70,6 +70,7 @@ if [ $? -ne  0 ]; then
 fi
 
 chown teamspeak:teamspeak -R "$INSTALLPATH"
+chmod o-w -R "$INSTALLPATH"
 
 echo "     Installed new TeamSpeak version at '$INSTALLPATH'..."
 
