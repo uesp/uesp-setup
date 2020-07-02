@@ -1,0 +1,84 @@
+#!/bin/sh
+#
+# Basic concept copied from https://github.com/eminga/ts3updater/blob/master/ts3updater.sh
+#
+
+
+INSTALLPATH="/home/uesp/teamspeak"
+BACKUPROOTPATH="/home/backup/teamspeak"
+
+JQ_INSTALLED=$(yum list installed | grep jq.x86_64)
+
+if [ -z "$JQ_INSTALLED" ]
+then
+	echo "     Installing JQ..."
+	yum install jq	
+fi
+
+SERVER=$(curl -Ls 'https://www.teamspeak.com/versions/server.json' | jq ".linux.x86_64")
+LINKS=$(printf '%s' "$SERVER" | jq -r '.mirrors | values[]')
+LINK=$(printf '%s' "$LINKS" | sed -n "1"p)
+
+echo $SERVER
+echo $LINK
+
+if [ -z "$LINK" ]
+then
+	echo "     No version of TeamSpeak found to install!"
+	exit
+fi
+
+echo "    Downloading $LINK"
+
+TMPFILE=$(mktemp "/tmp/ts3updater.XXXXXXXXXX")
+curl --fail -Lo "$TMPFILE" "$LINK"
+
+if [ $? == 0 ]; then
+	echo "     Successfully downloaded file!"
+else
+	echo "     Error: Curl failed to download file!"
+	exit
+fi
+
+echo "     Stopping teamspeak..."
+service teamspeak stop
+
+
+BACKUPDATE=$(date +"%Y-%m-%d-%H%M%S")
+BACKUPPATH="$BACKUPROOTPATH/$BACKUPDATE"
+echo "     Creating backup at '$BACKUPPATH'..."
+
+mv "$INSTALLPATH" "$BACKUPPATH"
+
+if [ $? -ne  0 ]; then
+	echo "     Error: Failed to move old files to backup!"
+	exit
+fi
+
+mkdir -p "$INSTALLPATH"
+
+if [ $? -ne  0 ]; then
+	echo "     Error: Failed to make new directory '$INSTALLPATH'!"
+	exit
+fi
+
+tar --strip-component 1 -xf "$TMPFILE" -C "$INSTALLPATH"
+
+if [ $? -ne  0 ]; then
+	echo "     Error: Failed to make new directory '$INSTALLPATH'!"
+	exit
+fi
+
+chown teamspeak:teamspeak -R "$INSTALLPATH"
+
+echo "     Installed new TeamSpeak version at '$INSTALLPATH'..."
+
+echo "     Copying old data to new path..."
+cp -Rp $BACKUPPATH/logs $INSTALLPATH/
+cp -Rp $BACKUPPATH/query*  $INSTALLPATH/
+cp -Rp $BACKUPPATH/ssh*  $INSTALLPATH/
+cp -Rp $BACKUPPATH/.ts3server_license_accepted  $INSTALLPATH/
+cp -Rp $BACKUPPATH/ts3server.sqlitedb*  $INSTALLPATH/
+
+echo "     Starting teamspeak..."
+service teamspeak start
