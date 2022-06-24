@@ -178,7 +178,7 @@ create_user "teamspeak"   704
 create_user "TamrielRebuilt" 705
 create_user "thelab"      1000
 create_user "sfwiki"      1001
-create_user "sfguides"    1001
+create_user "sfguides"    1002
 
 # Old users/groups no longer in use
 # create_user "sshbackup"   520
