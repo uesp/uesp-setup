@@ -8,6 +8,7 @@ verbosity = 0
 
 ignore = *.deploy
 ignore = .hg*
+ignore = .git*
 
 dest = content1.uesp.net:/uesp.setup/
 dest = content2.uesp.net:/uesp.setup/
@@ -20,5 +21,5 @@ dest = backup1.uesp.net:/uesp.setup/
 
 chown_source = :uespadmin -R *
 
-chmod_dest = g+rw {dest}/*
+# chmod_dest = g+rw {dest}*
 
