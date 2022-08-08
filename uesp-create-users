@@ -176,6 +176,7 @@ create_user "viud"        702
 create_user "jeremy"      703
 create_user "teamspeak"   704
 create_user "TamrielRebuilt" 705
+create_user "thalj"       706
 create_user "thelab"      1000
 create_user "sfwiki"      1001
 create_user "sfguides"    1002
@@ -202,4 +203,6 @@ add_user_to_group "dave" "uespforum"
 
 add_user_to_group "robinhood" "uespadmin"
 add_user_to_group "robinhood" "uesp"
+add_user_to_group "thalj" "uespadmin"
+add_user_to_group "thalj" "uesp"
 
