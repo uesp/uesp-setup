@@ -181,6 +181,7 @@ create_user "dania"       707
 create_user "thelab"      1000
 create_user "sfwiki"      1001
 create_user "sfguides"    1002
+create_user "Imperialbattlespire"    1003
 
 # Old users/groups no longer in use
 # create_user "sshbackup"   520
@@ -206,4 +207,6 @@ add_user_to_group "robinhood" "uespadmin"
 add_user_to_group "robinhood" "uesp"
 add_user_to_group "thal-j" "uespadmin"
 add_user_to_group "thal-j" "uesp"
+add_user_to_group "Imperialbattlespire" "uespadmin"
+add_user_to_group "Imperialbattlespire" "uesp"
 
