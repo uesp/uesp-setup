@@ -18,7 +18,7 @@ modify_path()
 	if [ ! -f "$BASHPROFILE" ]
 	then
 		echo "     ERROR: File '$BASHPROFILE' not found!"
-		return -2
+		return 2
 	fi
 	
 	RESULT=`egrep "^PATH=.*" $BASHPROFILE`
@@ -31,7 +31,7 @@ modify_path()
 		if [ -z "$RESULT" ]
 		then
 			echo "     ERROR: Failed to add PATH to file '$BASHPROFILE'!"
-			return -3
+			return 3
 		fi
 		
 		echo "     OK: Added PATH to end of file '$BASHPROFILE' with new path '$NEWPATH'!"
@@ -59,7 +59,7 @@ modify_path()
 	if [ "$RESULT" != 0 ]
 	then
 		echo "     ERROR: Failed to modify the file '$BASHPROFILE'!"
-		return -4
+		return 4
 	fi
 	
 	echo "     OK: Added '$NEWPATH' to the path in '$BASHPROFILE'."
