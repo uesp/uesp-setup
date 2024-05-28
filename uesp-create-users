@@ -182,6 +182,7 @@ create_user "thelab"      1000
 create_user "sfwiki"      1001
 create_user "sfguides"    1002
 create_user "Imperialbattlespire"    1003
+create_user "beyondskyrim"    1004
 
 # Old users/groups no longer in use
 # create_user "sshbackup"   520
