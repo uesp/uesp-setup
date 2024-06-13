@@ -9,7 +9,7 @@ SERVER="$1"
 REMOTEPATH="$2"
 LOCALPATH="$3"
 NFSTYPE="nfs"
-NFSOPTIONS="defaults"
+NFSOPTIONS="defaults,_netdev"
 FSTAB="/etc/fstab"
 
 if [ -z "$1" ] || [ -z "$2" ] || [ -z "$3" ]
