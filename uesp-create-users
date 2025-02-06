@@ -149,7 +149,8 @@ create_user "varnish"     496
 create_user "nginx"       497
 create_user "lighttpd"    498
 create_user "memcached"   499
-create_user "techiweb"    500
+#create_user "techiweb"    500
+create_user "lswadmin"    500
 create_user "sshadmin"    501
 create_user "apache"      502
 create_user "mysql"       503
@@ -178,6 +179,7 @@ create_user "teamspeak"   704
 create_user "TamrielRebuilt" 705
 create_user "thal-j"      706
 create_user "dania"       707
+create_user "eckserah"    708
 create_user "thelab"      1000
 create_user "sfwiki"      1001
 create_user "sfguides"    1002
@@ -208,6 +210,10 @@ add_user_to_group "robinhood" "uespadmin"
 add_user_to_group "robinhood" "uesp"
 add_user_to_group "thal-j" "uespadmin"
 add_user_to_group "thal-j" "uesp"
+add_user_to_group "eckserah" "uespadmin"
+add_user_to_group "eckserah" "uesp"
+add_user_to_group "eckserah" "mysql"
+add_user_to_group "eckserah" "apache"
 add_user_to_group "Imperialbattlespire" "uespadmin"
 add_user_to_group "Imperialbattlespire" "uesp"
 
