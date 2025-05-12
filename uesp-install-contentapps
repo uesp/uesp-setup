@@ -12,7 +12,7 @@ rpm -Uvh http://li.nux.ro/download/nux/dextop/el7/x86_64/nux-dextop-release-0-5.
 ./uesp-yuminstall "ffmpeg2theora"
 
 	# Custom ffmpeg install...not tested
-echo "WARNING: Installing untested ffmpeg..."	
+echo "WARNING: Installing untested ffmpeg..."
 pushd /home/uesp/
 wget https://johnvansickle.com/ffmpeg/builds/ffmpeg-git-amd64-static.tar.xz
 tar xvf ffmpeg-git-amd64-static.tar.xz

@@ -30,8 +30,6 @@ sed -i "s/^Hostname=.*/Hostname=$UESP_HOSTNAME/g" "$ZABBIXCONF"
 
 service zabbix-agent restart
 
+# sed -i "s/Server=(.*)/Server=10.12.222.25/g" "/etc/zabbix/zabbix_agentd.conf"
+
 echo "     OK: Successfully installed the Zabbix agent!"
-exit 0
-
-
-sed -i "s/Server=(.*)/Server=10.12.222.25/g" "/etc/zabbix/zabbix_agentd.conf"

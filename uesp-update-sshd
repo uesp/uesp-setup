@@ -87,7 +87,7 @@ fi
 chmod 644 /var/empty/sshd
 chown root:root /var/empty/sshd
 
- service sshd restart
+service sshd restart
 
 echo "     OK: Updated the sshd configuration."
 exit 0

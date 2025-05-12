@@ -2,6 +2,7 @@
 
 mkdir -p /home/uesp/cache
 mkdir -p /home/uesp/cache/_ar
+mkdir -p /home/uesp/cache/_fr
 mkdir -p /home/uesp/cache/_it
 mkdir -p /home/uesp/cache/_pt
 
