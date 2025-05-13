@@ -76,6 +76,7 @@ then
 fi
 
 sed -i "s/^DAEMON_LOG =.*/DAEMON_LOG = \/var\/log\/denyhosts\/denyhosts.log/g" /etc/denyhosts.conf
+sed -i "s/^SECURE_LOG = .*/SECURE_LOG = \/var\/log\/secure/g" /etc/denyhosts.conf
 
 ln -fs /usr/local/bin/denyhosts.py /usr/sbin/denyhosts.py
 RESULT=$?
