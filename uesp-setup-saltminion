@@ -11,7 +11,7 @@ echo "$LOCALHOSTNAME" > "$CONFIGPATH/minion_id"
 if [ $? != 0 ]
 then
 	echo "     ERROR: Failed to set the minion_id!"
-	return -2
+	exit -2
 fi
 
 cp "./salt.minion/*.conf" "$CONFIGPATH/minion.d/"
@@ -19,7 +19,7 @@ cp "./salt.minion/*.conf" "$CONFIGPATH/minion.d/"
 if [ $? != 0 ]
 then
 	echo "     ERROR: Failed to copy the config files!"
-	return -3
+	exit -3
 fi
 
 sed -i "s/^id:.*/id: $SHORTHOSTNAME/g" "$CONFIGPATH/minion.d/id.conf"
@@ -27,7 +27,7 @@ sed -i "s/^id:.*/id: $SHORTHOSTNAME/g" "$CONFIGPATH/minion.d/id.conf"
 if [ $? != 0 ]
 then
 	echo "     ERROR: Failed to modify the minion id.conf file!"
-	return -4
+	exit -4
 fi
 
 echo "Finished setting up the salt minion!"
