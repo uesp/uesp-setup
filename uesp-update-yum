@@ -13,7 +13,6 @@ curl -fsSL https://github.com/saltstack/salt-install-guide/releases/latest/downl
 # ./uesp-yuminstall "epel-release"
 # yum -q -y install http://rpms.remirepo.net/enterprise/remi-release-7.rpm
 # yum-config-manager --enable remi-php56 > /dev/null
-# curl -fsSL https://github.com/saltstack/salt-install-guide/releases/latest/download/salt.repo | sudo tee /etc/yum.repos.d/salt.repo
 
 ./uesp-update-yumapps
 

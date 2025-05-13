@@ -1,0 +1,12 @@
+#!/bin/sh
+
+CONFIGPATH="/etc/salt"
+LOCALHOSTNAME=`hostname`
+
+echo "$LOCALHOSTNAME.uesp.net" > "$CONFIGPATH/minion_id"
+
+if [ $? != 0 ]
+then
+	echo "     ERROR: Failed to set the minion_id!"
+	return -2
+fi
