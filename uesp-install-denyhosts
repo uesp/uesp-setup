@@ -77,7 +77,7 @@ fi
 
 sed -i "s/^DAEMON_LOG =.*/DAEMON_LOG = \/var\/log\/denyhosts\/denyhosts.log/g" /etc/denyhosts.conf
 
-ln -fs /usr/local/bin/denyhosts.py /usr/local/bin/denyhosts
+ln -fs /usr/local/bin/denyhosts.py /usr/sbin/denyhosts
 RESULT=$?
 
 if [ $RESULT != 0 ]
