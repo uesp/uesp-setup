@@ -7,31 +7,33 @@ echo "Starting base app installation..."
 
 ./uesp-yuminstall "at"
 ./uesp-yuminstall "vsftpd"
-./uesp-yuminstall "libmcrypt"
 ./uesp-yuminstall "libtool-ltdl"
 ./uesp-yuminstall "gcc"
 ./uesp-yuminstall "gcc-c++"
-./uesp-yuminstall "ntp"
 ./uesp-yuminstall "nfs-utils"
-./uesp-yuminstall "re2c"
 ./uesp-yuminstall "curl"
 ./uesp-yuminstall "libcurl-devel"
 ./uesp-yuminstall "bind-utils"
 ./uesp-yuminstall "time"
+./uesp-yuminstall "iputils"
 ./uesp-yuminstall "salt-minion"
-./uesp-yuminstall "iputils-ping"
+# ./uesp-yuminstall "ntp" # AlmaLinux uses chrony
+./uesp-yuminstall "re2c"
+./uesp-yuminstall "libmcrypt"
 
-./uesp-yuminstall "python"
-./uesp-yuminstall "MySQL-python"
+# AlmaLinux 9 doesn't have python 2.7, default python is 3.9
+# ./uesp-yuminstall "python"
+# ./uesp-yuminstall "MySQL-python"
+./uesp-yuminstall "python3"
+./uesp-yuminstall "python3-mysqlclient"
 
 # ./uesp-yuminstall "swig"   # ???
 
 systemctl enable atd
-systemctl enable ntpd
-
 systemctl start atd
-systemctl start ntpd
 
-
+# AlmaLinux uses chrony which is already installed/enabled
+# systemctl enable ntpd
+# systemctl start ntpd
 
 

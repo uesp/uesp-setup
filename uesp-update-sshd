@@ -83,7 +83,7 @@ else
 fi
 
 
-# Fix possible permission issue
+# Fix possible permission issue, path not present on AlmaLinux
 chmod 644 /var/empty/sshd
 chown root:root /var/empty/sshd
 

@@ -2,8 +2,10 @@
 
 echo "Starting uesp-install-denyhosts..."
 
-./uesp-yuminstall "python"
-./uesp-yuminstall "python-ipaddr"
+#./uesp-yuminstall "python"
+# ./uesp-yuminstall "python-ipaddr"
+./uesp-yuminstall "python3"
+./uesp-yuminstall "python3-types-ipaddress"
 
 pushd denyhosts > /dev/null
 

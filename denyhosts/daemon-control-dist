@@ -1,6 +1,7 @@
-#!/usr/bin/env python
+#!/usr/bin/python3
 import os  # do not edit
 import sys  # do not edit
+import platform # do not edit
 import signal  # do not edit
 import time  # do not edit
 # denyhosts     Bring up/down the DenyHosts daemon
@@ -15,11 +16,22 @@ import time  # do not edit
 #    Edit these to suit your configuration    #
 ###############################################
 
-DENYHOSTS_BIN = "/usr/sbin/denyhosts"
+DENYHOSTS_BIN = "/usr/sbin/denyhosts.py"
 DENYHOSTS_LOCK = "/run/denyhosts.pid"
 DENYHOSTS_CFG = "/etc/denyhosts.conf"
 
-PYTHON_BIN = "/usr/bin/env python"
+PYTHON_BIN = "/usr/bin/python3"
+
+distro = platform.uname()[3]
+distro2 = platform.uname()[2]
+if distro.find('Debian') >= 0:
+    DENYHOSTS_BIN = "/usr/local/bin/denyhosts.py"
+elif distro.find('FreeBSD') >= 0:
+    DENYHOSTS_BIN = "/usr/local/bin/denyhosts.py"
+else:
+    #centos
+    if distro2.find('el6') >= 0 or distro2.find('el7') >= 0:
+        DENYHOSTS_BIN = "/usr/bin/denyhosts.py"
 
 ###############################################
 ###############################################
@@ -42,7 +54,7 @@ STATE_LOCK_EXISTS = -2
 
 def usage():
     print(
-        'Usage: {0} {start [args...] | stop | restart [args...] | status | debug | condrestart [args...]'.format(
+        'Usage: {0} start [args...] | stop | restart [args...] | status | debug | condrestart [args...]'.format(
             sys.argv[0]
         )
     )

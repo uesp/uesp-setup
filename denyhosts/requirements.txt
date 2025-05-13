@@ -1,3 +1,0 @@
-ipaddr>=2.1
-requests
-configparser

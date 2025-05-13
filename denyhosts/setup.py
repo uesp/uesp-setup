@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/python3
 # Copyright 2005-2006 (C) Phil Schwartz <phil_schwartz@users.sourceforge.net>
 # Copyright 2014 (C) Jesse Smith <jessefrgsmith@yahoo.ca>
 

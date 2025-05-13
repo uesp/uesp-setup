@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/python3
 #
 ############################################################################
 # this script will read the /etc/passwd file and extract usernames

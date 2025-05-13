@@ -1,15 +1,11 @@
-Metadata-Version: 1.0
-Name: DenyHost
-Version: 2.9
+Metadata-Version: 1.1
+Name: DenyHosts
+Version: 3.1.2
 Summary: DenyHost is a utility to help sys admins thwart ssh hackers
 Home-page: http://denyhost.sourceforge.net
 Author: Jesse Smith
 Author-email: jessefrgsmith@yahoo.ca
 License: GPL v2
-Description: 
-        DenyHost is a python program that automatically blocks ssh attacks by adding entries to
-        /etc/hosts.deny. DenyHosts will also inform Linux administrators about offending hosts, attacked
-        users and suspicious logins.
-        Originally authored by Phil Schwartz.
-        
+Description: DenyHosts is a python program that automatically blocks ssh attacks by adding entries to /etc/hosts.deny. DenyHosts will also inform administrators about offending hosts, attacked users and suspicious logins. Originally written by Phil Schwartz.
 Platform: UNKNOWN
+Requires: ipaddr
