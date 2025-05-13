@@ -2,7 +2,7 @@
 
 echo "Starting base app installation..."
 
-./uesp-install-hg
+# ./uesp-install-hg
 ./uesp-install-git
 
 ./uesp-yuminstall "at"
@@ -19,6 +19,7 @@ echo "Starting base app installation..."
 ./uesp-yuminstall "bind-utils"
 ./uesp-yuminstall "time"
 ./uesp-yuminstall "salt-minion"
+./uesp-yuminstall "iputils-ping"
 
 ./uesp-yuminstall "python"
 ./uesp-yuminstall "MySQL-python"
