@@ -77,6 +77,16 @@ fi
 
 sed -i "s/^DAEMON_LOG =.*/DAEMON_LOG = \/var\/log\/denyhosts\/denyhosts.log/g" /etc/denyhosts.conf
 
+ln -fs /usr/local/bin/denyhosts.py /usr/sbin/denyhosts.py
+RESULT=$?
+
+if [ $RESULT != 0 ]
+then
+	echo "     ERROR: Failed to create /usr/sbin/denyhosts.py entry!"
+	popd
+	exit -5
+fi
+
 ln -fs /usr/local/bin/denyhosts.py /usr/sbin/denyhosts
 RESULT=$?
 
