@@ -1,0 +1,33 @@
+#!/bin/sh
+
+echo "Starting uesp-setup-rclocal..."
+
+chmod +x /etc/rc.d/rc.local
+RESULT=$?
+
+if [ $RESULT != 0 ]
+then
+	echo "     ERROR: Failed to change the permissions of /etc/rc.d/rc.local file!"
+	exit -1
+fi
+
+
+systemctl enable rc-local.service
+RESULT=$?
+
+if [ $RESULT != 0 ]
+then
+	echo "     ERROR: Failed to enable rc-local.service!"
+	exit -1
+fi
+
+systemctl start rc-local.service
+RESULT=$?
+
+if [ $RESULT != 0 ]
+then
+	echo "     ERROR: Failed to start rc-local.service!"
+	exit -1
+fi
+
+echo "Finished uesp-setup-rclocal!"

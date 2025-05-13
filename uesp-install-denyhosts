@@ -34,7 +34,7 @@ then
 	echo "     WARNING: Failed to modify denyhosts send e-mail address!"
 fi
 
-mv -f /usr/bin/daemon-control-dist /usr/bin/denyhosts-daemon-control
+mv -f /usr/local/bin/daemon-control-dist /usr/local/bin/denyhosts-daemon-control
 RESULT=$?
 
 if [ $RESULT != 0 ]
@@ -44,7 +44,7 @@ then
 	exit -2
 fi
 
-chown root /usr/bin/denyhosts-daemon-control
+chown root /usr/local/bin/denyhosts-daemon-control
 RESULT=$?
 
 if [ $RESULT != 0 ]
@@ -54,7 +54,7 @@ then
 	exit -3
 fi
 
-chmod 700 /usr/bin/denyhosts-daemon-control
+chmod 700 /usr/local/bin/denyhosts-daemon-control
 RESULT=$?
 
 if [ $RESULT != 0 ]
@@ -87,7 +87,7 @@ then
 	exit -5
 fi
 
-ln -fs /usr/bin/denyhosts.py /usr/sbin/denyhosts
+ln -fs /usr/local/bin/denyhosts.py /usr/local/bin/denyhosts
 RESULT=$?
 
 if [ $RESULT != 0 ]
