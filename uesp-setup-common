@@ -58,6 +58,7 @@ get_zabbix_server_ip
 ./uesp-update-yum
 ./uesp-install-baseapps
 ./uesp-update-sshd
+./uesp-setup-rclocal
 ./uesp-install-denyhosts
 ./uesp-update-path
 ./uesp-update-maxfiles

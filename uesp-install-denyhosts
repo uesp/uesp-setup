@@ -77,16 +77,6 @@ fi
 
 sed -i "s/^DAEMON_LOG =.*/DAEMON_LOG = \/var\/log\/denyhosts\/denyhosts.log/g" /etc/denyhosts.conf
 
-ln -fs /usr/bin/denyhosts-daemon-control /etc/init.d/denyhosts
-RESULT=$?
-
-if [ $RESULT != 0 ]
-then
-	echo "     ERROR: Failed to add DenyHosts startup script to '/etc/init.d/'!"
-	popd
-	exit -5
-fi
-
 ln -fs /usr/local/bin/denyhosts.py /usr/local/bin/denyhosts
 RESULT=$?
 
@@ -97,17 +87,19 @@ then
 	exit -5
 fi
 
-systemctl enable denyhosts
+LINE="denyhosts-daemon-control start"
+FILE=/etc/rc.d/rc.local
+grep -q "$LINE" "$FILE" || echo "$LINE" >> "$FILE"
 RESULT=$?
 
 if [ $RESULT != 0 ]
 then
-	echo "     ERROR: Failed to add DenyHosts startup script using systemctl!"
+	echo "     ERROR: Failed to add DenyHosts startup script to '/etc/rc.local'!"
 	popd
-	exit -6
+	exit -5
 fi
 
-systemctl start denyhosts
+denyhosts-daemon-control start
 RESULT=$?
 
 if [ $RESULT != 0 ]
