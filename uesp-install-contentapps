@@ -2,26 +2,30 @@
 
 ./uesp-yuminstall "mariadb"
 
-yum-config-manager --enable remi-php56 > /dev/null
+# Not required in AlmaLinux
+# yum-config-manager --enable remi-php56 > /dev/null
 
-	# For ffmpeg
-rpm --import http://li.nux.ro/download/nux/RPM-GPG-KEY-nux.ro
-rpm -Uvh http://li.nux.ro/download/nux/dextop/el7/x86_64/nux-dextop-release-0-5.el7.nux.noarch.rpm
-./uesp-yuminstall "ffmpeg"
-./uesp-yuminstall "ffmpeg-devel"
-./uesp-yuminstall "ffmpeg2theora"
+	# FFMpeg: Not working in AlmaLinux 8
+# rpm --import http://li.nux.ro/download/nux/RPM-GPG-KEY-nux.ro
+# rpm -Uvh http://li.nux.ro/download/nux/dextop/el7/x86_64/nux-dextop-release-0-5.el7.nux.noarch.rpm
+# ./uesp-yuminstall "ffmpeg"
+# ./uesp-yuminstall "ffmpeg-devel"
+# ./uesp-yuminstall "ffmpeg2theora"
 
 	# Custom ffmpeg install...not tested
 echo "WARNING: Installing untested ffmpeg..."
 pushd /home/uesp/
 wget https://johnvansickle.com/ffmpeg/builds/ffmpeg-git-amd64-static.tar.xz
 tar xvf ffmpeg-git-amd64-static.tar.xz
-mv -f ffmpeg-fit-amd64-static ffmpeg
+mv -f ffmpeg-git-20240629-amd64-static ffmpeg
 chown uesp:uespadmin /home/uesp/ffmpeg/
 chmod g+rwx /home/uesp/ffmpeg/
 popd
 echo "Finished installing untested ffmpeg!"
+
+./uesp-yuminstall "lua"
  
+ # Default install is PHP v8.0 on AlmaLinux 9
 ./uesp-yuminstall "php"
 ./uesp-yuminstall "php-common"
 ./uesp-yuminstall "php-devel"
@@ -30,17 +34,17 @@ echo "Finished installing untested ffmpeg!"
 ./uesp-yuminstall "php-gd"
 ./uesp-yuminstall "php-intl"
 ./uesp-yuminstall "php-mbstring"
-./uesp-yuminstall "php-mcrypt"
+# ./uesp-yuminstall "php-mcrypt"
 ./uesp-yuminstall "php-mysqlnd"
 ./uesp-yuminstall "php-opcache"
 ./uesp-yuminstall "php-pdo"
 ./uesp-yuminstall "php-pear"
 ./uesp-yuminstall "php-pecl-apcu"
-./uesp-yuminstall "php-pecl-imagick-im6"
-./uesp-yuminstall "php-pecl-jsonc"
-./uesp-yuminstall "php-pecl-jsonc-devel"
-./uesp-yuminstall "php-pecl-lua"
+./uesp-yuminstall "php-pecl-imagick"
+# ./uesp-yuminstall "php-pecl-luasandbox"
 ./uesp-yuminstall "php-pecl-memcache"
+./uesp-yuminstall "php-pecl-memcached"
+# ./uesp-yuminstall "php-pecl-runkit7"
 ./uesp-yuminstall "php-pecl-zip"
 ./uesp-yuminstall "php-process"
 ./uesp-yuminstall "php-snmp"
@@ -78,7 +82,7 @@ echo "Finished installing untested ffmpeg!"
 ./uesp-yuminstall "php74-php-bcmath"
 ./uesp-yuminstall "php74-php-gd"
 ./uesp-yuminstall "php74-php-intl"
-./uesp-yuminstall "php74-php-jsonc"
+./uesp-yuminstall "php74-php-json"
 ./uesp-yuminstall "php74-php-mbstring"
 ./uesp-yuminstall "php74-php-mysqlnd"
 ./uesp-yuminstall "php74-php-opcache"
@@ -124,7 +128,7 @@ echo "Finished installing untested ffmpeg!"
 ./uesp-yuminstall "php80-php-xml"
 
 ./uesp-yuminstall "gnuplot"
-./uesp-yuminstall "pkgconfig"
+./uesp-yuminstall "pkgconf"
 
 # ./uesp-yuminstall "perl"
 # ./uesp-yuminstall "perl-DBD-MySQL"
@@ -139,7 +143,6 @@ systemctl enable httpd
 
 ./uesp-yuminstall "ImageMagick"
 ./uesp-yuminstall "tidy"
-
 ./uesp-yuminstall "fail2ban"
 
 ./uesp-install-wikidiff2

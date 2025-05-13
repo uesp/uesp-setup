@@ -3,15 +3,15 @@
 echo "Starting uesp-update-yum..."
 
 ./uesp-yuminstall "yum-utils"
-
 ./uesp-yuminstall "epel-release"
 
 # Salt Repo
 curl -fsSL https://github.com/saltstack/salt-install-guide/releases/latest/download/salt.repo | sudo tee /etc/yum.repos.d/salt.repo
 
+# Remi Repos
+yum -q -y install http://rpms.remirepo.net/enterprise/remi-release-97.rpm
+
 # These are not needed on AlmaLinux 9?
-# ./uesp-yuminstall "epel-release"
-# yum -q -y install http://rpms.remirepo.net/enterprise/remi-release-7.rpm
 # yum-config-manager --enable remi-php56 > /dev/null
 
 ./uesp-update-yumapps

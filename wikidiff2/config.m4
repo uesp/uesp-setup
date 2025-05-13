@@ -1,9 +1,3 @@
-dnl $Id$
-
-dnl if test -z "$CXX"; then
-dnl 	AC_MSG_ERROR([PHP is bugged. Set \$CXX to a C++ compiler.])
-dnl fi
-
 PHP_ARG_ENABLE(wikidiff2, whether to enable wikidiff2 support,
 [  --enable-wikidiff2           Enable wikidiff2 support])
 
@@ -21,9 +15,9 @@ if test "$PHP_WIKIDIFF2" != "no"; then
 	AC_MSG_ERROR([required utility 'pkg-config' not found])
   fi
 
-  if ! $PKG_CONFIG --exists libthai
+  if ! $PKG_CONFIG --atleast-version=0.1.25 --exists libthai
   then
-	AC_MSG_ERROR(['libthai' not known to pkg-config])
+	AC_MSG_ERROR(['libthai' is not in pkg-config or version < 0.1.25])
   fi
 
   PHP_EVAL_INCLINE(`$PKG_CONFIG --cflags-only-I libthai`)
@@ -37,5 +31,16 @@ if test "$PHP_WIKIDIFF2" != "no"; then
   PHP_SUBST(WIKIDIFF2_SHARED_LIBADD)
   AC_DEFINE(HAVE_WIKIDIFF2, 1, [ ])
   export CXXFLAGS="-Wno-write-strings -std=c++11 $CXXFLAGS"
-  PHP_NEW_EXTENSION(wikidiff2, php_wikidiff2.cpp Wikidiff2.cpp TableDiff.cpp InlineDiff.cpp InlineDiffJSON.cpp, $ext_shared)
+  PHP_NEW_EXTENSION(wikidiff2, \
+	src/php_wikidiff2.cpp \
+	src/lib/Wikidiff2.cpp \
+	src/lib/Formatter.cpp \
+	src/lib/TableFormatter.cpp \
+	src/lib/InlineFormatter.cpp \
+	src/lib/InlineJSONFormatter.cpp \
+	src/lib/TextUtil.cpp \
+	src/lib/LineDiffProcessor.cpp \
+	src/lib/WordDiffCache.cpp \
+	src/lib/WordDiffSegmenter.cpp \
+	src/lib/WordDiffStats.cpp, $ext_shared)
 fi

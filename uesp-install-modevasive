@@ -2,4 +2,5 @@
 
 echo "Installing mod_evasive for Apache 2.4..."
 
-./uesp-yuminstall "mod_evasive"
+echo "On AlmaLinux 9 you have to compile/install from source (see https://github.com/shivaas/mod_evasive)."
+# ./uesp-yuminstall "mod_evasive"
