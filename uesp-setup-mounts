@@ -53,12 +53,8 @@ add_host_entry()
 
 mkdir -p /mnt/uesp
 
-mount_path "10.12.222.41" "/shared/uesp"      "/mnt/uesp"
+mount_path "10.12.222.26" "/shared/uesp"      "/mnt/uesp"
+mount_path "10.12.222.26" "/shared/sfwiki"    "/mnt/sfwiki"
 
-# mount_path "10.12.222.41" "/shared/phpsessions"          "/mnt/phpsessions"
-# mount_path "10.12.222.41" "/shared/eqwiki/wikiimages"    "/mnt/eqwiki/wikiimages"
-# mount_path "10.12.222.41" "/shared/eqwiki/filecache"     "/mnt/eqwiki/filecache"
-# mount_path "10.12.222.41" "/shared/davewiki/wikiimages"  "/mnt/davewiki/wikiimages"
-# mount_path "10.12.222.41" "/shared/davewiki/filecache"   "/mnt/davewiki/filecache"
 
 
