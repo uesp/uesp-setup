@@ -14,7 +14,7 @@ then
 	exit -2
 fi
 
-cp "./salt.minion/*.conf" "$CONFIGPATH/minion.d/"
+cp ./salt.minion/*.conf "$CONFIGPATH/minion.d/"
 
 if [ $? != 0 ]
 then
