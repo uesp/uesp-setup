@@ -55,6 +55,7 @@ mkdir -p /mnt/uesp
 
 mount_path "10.12.222.26" "/shared/uesp"      "/mnt/uesp"
 mount_path "10.12.222.26" "/shared/sfwiki"    "/mnt/sfwiki"
+mount_path "10.12.222.26" "/shared/fallout"   "/mnt/fallout"
 
 
 
