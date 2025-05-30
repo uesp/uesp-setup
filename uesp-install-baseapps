@@ -36,4 +36,5 @@ systemctl start atd
 # systemctl enable ntpd
 # systemctl start ntpd
 
-
+# Set server timezone
+timedatectl set-timezone America/Toronto
