@@ -141,55 +141,6 @@ add_user_to_group()
         return 0
 }
 
-create_user "uespadmin"    522
-create_user "uespforum"    521
-# create_group "uespadmin"  522
-# create_group "uespforum"  521
-
-create_user "opendkim"    495
-create_user "varnish"     496
-create_user "nginx"       497
-create_user "lighttpd"    498
-create_user "memcached"   499
-#create_user "techiweb"    500
-create_user "lswadmin"    500
-create_user "sshadmin"    501
-create_user "apache"      502
-create_user "mysql"       503
-create_user "backup"      504
-create_user "uesp"        505
-create_user "squid"       506
-create_user "eqwiki"      507
-create_user "dave"        519
-create_user "nephele"     523
-create_user "rpeh"        524
-create_user "blog"        527
-create_user "uespkey"     530
-create_user "dungeonhack" 531
-create_user "ocp"         532
-create_user "zabbix"      535
-create_user "robinhood"   536
-create_user "alfwyn"      537
-create_user "jakatackka"  538
-create_user "kiz"         539
-create_user "fallout"     540
-create_user "egd"         610
-create_user "avron"       700
-create_user "steve"       701
-create_user "viud"        702
-create_user "jeremy"      703
-create_user "teamspeak"   704
-create_user "TamrielRebuilt" 705
-create_user "thal-j"      706
-create_user "dania"       707
-create_user "eckserah"    708
-create_user "thelab"      1000
-create_user "sfwiki"      1001
-create_user "sfguides"    1002
-create_user "Imperialbattlespire"    1003
-create_user "beyondskyrim"    1004
-
-
 # Old users/groups no longer in use
 # create_user "sshbackup"   520
 # create_user "uespinfo"    526
@@ -203,6 +154,52 @@ create_user "beyondskyrim"    1004
 # create_user "qmailr"      607 "qmail"
 # create_user "qmails"      608 "qmail"
 # create_user "vpopmail"    609
+# create_user "opendkim"    495
+# create_user "techiweb"    500
+# create_user "lswadmin"    500
+# create_user "sshadmin"    501
+# create_user "rpeh"        524
+# create_user "jakatackka"  538
+# create_user "kiz"         539
+# create_user "dania"       707
+# create_user "thelab"      1000
+# create_user "sfguides"    1002
+# create_user "avron"       700
+# create_user "steve"       701
+# create_user "jeremy"      703
+# create_user "alfwyn"      537
+
+create_user "varnish"     496
+create_user "nginx"       497
+create_user "lighttpd"    498
+create_user "memcached"   499
+create_user "apache"      502
+create_user "mysql"       503
+create_user "backup"      504
+create_user "uesp"        505
+create_user "squid"       506
+create_user "eqwiki"      507
+create_user "dave"        519
+create_user "uespforum"   521
+create_user "uespadmin"   522
+create_user "nephele"     523
+create_user "blog"        527
+create_user "uespkey"     530
+create_user "dungeonhack" 531
+create_user "ocp"         532
+create_user "zabbix"      535
+create_user "robinhood"   536
+create_user "fallout"     540
+create_user "egd"         610
+create_user "viud"        702
+create_user "teamspeak"   704
+create_user "TamrielRebuilt" 705
+create_user "thal-j"      706
+create_user "eckserah"    708
+create_user "sfwiki"      1001
+create_user "Imperialbattlespire"    1003
+create_user "beyondskyrim"    1004
+
 
 add_user_to_group "dave" "uespadmin"
 add_user_to_group "dave" "uesp"
@@ -218,6 +215,4 @@ add_user_to_group "eckserah" "uespadmin"
 add_user_to_group "eckserah" "uesp"
 add_user_to_group "eckserah" "mysql"
 add_user_to_group "eckserah" "apache"
-add_user_to_group "Imperialbattlespire" "uespadmin"
-add_user_to_group "Imperialbattlespire" "uesp"
 
