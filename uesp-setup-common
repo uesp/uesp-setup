@@ -65,6 +65,7 @@ get_zabbix_server_ip
 ./uesp-update-bashrc "new-"
 ./uesp-update-vimrc
 ./uesp-setup-saltminion
+./uesp-fix-homeperms
 
 if [ ! -z "$ZABBIXSERVER" ]
 then

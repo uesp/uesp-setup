@@ -1,0 +1,30 @@
+#!/bin/sh
+#
+# Sets some of the /home directory permissions that need to be globally accessible.
+#
+
+chmod g+rwx,a+rx /home/beyondskyrim
+chmod g+rwx,a+rx /home/dave
+chmod g+rwx,a+rx /home/dungeonhack
+chmod g+rwx,a+rx /home/egd
+chmod g+rwx,a+rx /home/eqwiki
+chmod g+rwx,a+rx /home/fallout
+chmod g+rwx,a+rx /home/falloutde
+chmod g+rwx,a+rx /home/robinhood
+chmod g+rwx,a+rx /home/sfwiki
+chmod g+rwx,a+rx /home/thal-j
+chmod g+rwx,a+rx /home/twelveworlds
+chmod g+rwx,a+rx /home/uesp
+chmod g+rwx,a+rx /home/viud
+chmod g+rwx,a+rx /home/zabbix
+
+mkdkir /home/backup
+chown backup:uespadmin /home/backup
+
+chown uespadmin /home/beyondskyrim
+chown uespadmin /home/dave
+chown uespadmin /home/fallout
+chown uespadmin /home/falloutde
+chown uespadmin /home/sfwiki
+chown uespadmin /home/twelveworlds
+chown uespadmin /home/uesp
