@@ -62,7 +62,7 @@ get_zabbix_server_ip
 ./uesp-install-denyhosts
 ./uesp-update-path
 ./uesp-update-maxfiles
-./uesp-update-bashrc "new"
+./uesp-update-bashrc "new-"
 ./uesp-setup-saltminion
 
 if [ ! -z "$ZABBIXSERVER" ]
