@@ -3,6 +3,14 @@
 # Changes the default vim colorscheme in /etc/vimrc
 #
 
+if [ ! -f "/etc/vimrc" ]; then
+	echo "Warning: /etc/vimrc file does not exist!"
+	exit 1
+fi 
+
 if ! grep -q "colorscheme desert" /etc/vimrc; then
 	echo "colorscheme desert" >> /etc/vimrc
+	echo "Updated default vim colorscheme to desert!"
+else
+	echo "Default vim colorscheme is already set to desert!"
 fi
