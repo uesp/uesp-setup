@@ -1,0 +1,8 @@
+#!/bin/sh
+#
+# Changes the default vim colorscheme in /etc/vimrc
+#
+
+if ! grep -q "colorscheme desert" /etc/vimrc; then
+	cat "colorscheme desert" >> /etc/vimrc
+fi
