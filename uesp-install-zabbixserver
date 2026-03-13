@@ -11,8 +11,6 @@ then
 	exit -1
 fi
 
-yum-config-manager --enable remi-php56 > /dev/null
-
 ./uesp-yuminstall "php-gd"
 ./uesp-yuminstall "php-bcmath"
 ./uesp-yuminstall "php-xml"
@@ -38,8 +36,7 @@ yum-config-manager --enable remi-php56 > /dev/null
 ./uesp-yuminstall "net-snmp-libs"
 ./uesp-yuminstall "net-snmp-utils"
 
-rpm -Uvh https://repo.zabbix.com/zabbix/4.4/rhel/7/x86_64/zabbix-release-4.4-1.el7.noarch.rpm
-yum-config-manager --enable rhel-7-server-optional-rpms > /dev/null
+rpm -Uvh https://repo.zabbix.com/zabbix/7.2/release/alma/9/noarch/zabbix-release-latest-7.2.el9.noarch.rpm
 
 ./uesp-yuminstall zabbix-server-mysql
 ./uesp-yuminstall zabbix-web-mysql
