@@ -3,6 +3,16 @@
 # Sets some of the /home directory permissions that need to be globally accessible.
 #
 
+mkdir /home/backup
+chown backup:uespadmin /home/backup
+
+mkdir /home/falloutde
+chown fallout /home/backup
+
+mkdir /home/twelveworlds
+chown uesp /home/twelveworlds
+
+chmod g+rwx,a+rx /home/backup
 chmod g+rwx,a+rx /home/beyondskyrim
 chmod g+rwx,a+rx /home/dave
 chmod g+rwx,a+rx /home/dungeonhack
@@ -17,9 +27,6 @@ chmod g+rwx,a+rx /home/twelveworlds
 chmod g+rwx,a+rx /home/uesp
 chmod g+rwx,a+rx /home/viud
 chmod g+rwx,a+rx /home/zabbix
-
-mkdkir /home/backup
-chown backup:uespadmin /home/backup
 
 chown uespadmin /home/beyondskyrim
 chown uespadmin /home/dave
