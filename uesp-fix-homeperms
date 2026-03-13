@@ -3,13 +3,13 @@
 # Sets some of the /home directory permissions that need to be globally accessible.
 #
 
-mkdir /home/backup
+mkdir -p /home/backup
 chown backup:uespadmin /home/backup
 
-mkdir /home/falloutde
+mkdir -p /home/falloutde
 chown fallout /home/backup
 
-mkdir /home/twelveworlds
+mkdir -p /home/twelveworlds
 chown uesp /home/twelveworlds
 
 chmod g+rwx,a+rx /home/backup
