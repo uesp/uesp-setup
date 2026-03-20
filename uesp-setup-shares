@@ -17,15 +17,7 @@ add_host_entry()
 add_exports_entry()
 # $1 = IP address to add to exports
 {
-	# ./uesp-addexportsentry  "/shared/phpsessions"         "$1"
-	 
-	./uesp-addexportsentry  "/shared/uesp"     "$1" 
-	./uesp-addexportsentry  "/shared/uesp"      "$1"
-	 
-	# ./uesp-addexportsentry  "/shared/eqwiki/wikiimages"   "$1" 
-	# ./uesp-addexportsentry  "/shared/eqwiki/filecache"    "$1" 
-	# ./uesp-addexportsentry  "/shared/davewiki/wikiimages" "$1" 
-	# ./uesp-addexportsentry  "/shared/davewiki/filecache"  "$1" 
+	./uesp-addexportsentry  "/shared"      "$1"
 }
 
 ./uesp-yuminstall "nfs-utils"
@@ -40,18 +32,16 @@ systemctl start nfs-server
 systemctl start nfs-lock
 systemctl start nfs-idmap
 
-mkdir -p /shared/uesp/wikiimages
-
-# ./uesp-update-hosts
-
-add_exports_entry "10.12.222.22"
-add_exports_entry "10.12.222.23"
-add_exports_entry "10.12.222.24"
-add_exports_entry "10.12.222.25"
+add_exports_entry "10.12.123.11"
+add_exports_entry "10.12.123.18"
+add_exports_entry "10.12.123.19"
+add_exports_entry "10.12.123.12"
+add_exports_entry "10.12.123.17"
 
 add_exports_entry "107.161.64.230"
 add_exports_entry "107.161.64.231"
 add_exports_entry "107.161.64.232"
+add_exports_entry "107.161.64.239"
 add_exports_entry "107.161.64.233"
 
 /usr/sbin/exportfs -ra
