@@ -49,13 +49,16 @@ add_host_entry()
 
 ./uesp-yuminstall "nfs-utils"
 
-# ./uesp-update-hosts
+rmdir /mnt/uesp
+rmdir /mnt/fallout
+rmdir /mnt/sfwiki
 
-mkdir -p /mnt/uesp
+mkdir -p /mnt/shared
+ln -sf /mnt/shared/uesp /mnt/uesp
+ln -sf /mnt/shared/sfwiki /mnt/sfwiki
+ln -sf /mnt/shared/fallout /mnt/fallout
 
-mount_path "10.12.222.26" "/shared/uesp"      "/mnt/uesp"
-mount_path "10.12.222.26" "/shared/sfwiki"    "/mnt/sfwiki"
-mount_path "10.12.222.26" "/shared/fallout"   "/mnt/fallout"
+mount_path "10.12.123.16" "/shared" "/mnt/shared"
 
 
 
