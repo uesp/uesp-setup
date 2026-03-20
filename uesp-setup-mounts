@@ -19,8 +19,10 @@ mount_path()
 	
 	./uesp-addfstabentry "$SERVER" "$REMOTEPATH" "$LOCALPATH"
 
+	echo "Unmounting $LOCALPATH ..."
 	umount "$LOCALPATH" 2> /dev/null
 	
+	echo "Mounting $LOCALPATH ..."
 	mount $SERVER:$REMOTEPATH "$LOCALPATH" > /dev/null
 	
 	if [ $? != 0 ]
@@ -61,8 +63,12 @@ if [ ! -e "/mnt/uesp" ]; then
 	ln -s /mnt/shared/fallout /mnt/fallout
 fi
 
+	# Run this on the new servers
 mount_path "10.12.123.16" "/shared" "/mnt/shared"
-mount_path "184.107.171.220" "/shared" "/mnt/shared"
+
+	# Run this on the old servers
+# mount_path "184.107.171.220" "/shared" "/mnt/shared"
+
 
 
 

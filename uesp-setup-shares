@@ -24,13 +24,13 @@ add_exports_entry()
 
 systemctl enable rpcbind
 systemctl enable nfs-server
-systemctl enable nfs-lock
-systemctl enable nfs-idmap
+# systemctl enable nfs-lock
+# systemctl enable nfs-idmap
 
 systemctl start rpcbind
 systemctl start nfs-server
-systemctl start nfs-lock
-systemctl start nfs-idmap
+# systemctl start nfs-lock
+# systemctl start nfs-idmap
 
 add_exports_entry "10.12.123.11"
 add_exports_entry "10.12.123.18"
