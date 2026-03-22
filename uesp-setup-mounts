@@ -53,6 +53,7 @@ add_host_entry()
 
 rmdir /mnt/uesp
 rmdir /mnt/fallout
+rmdir /mnt/falloutde
 rmdir /mnt/sfwiki
 
 mkdir -p /mnt/shared
@@ -61,6 +62,7 @@ if [ ! -e "/mnt/uesp" ]; then
 	ln -s /mnt/shared/uesp /mnt/uesp
 	ln -s /mnt/shared/sfwiki /mnt/sfwiki
 	ln -s /mnt/shared/fallout /mnt/fallout
+	ln -s /mnt/shared/falloutde /mnt/falloutde
 fi
 
 	# Run this on the new servers
