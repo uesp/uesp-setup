@@ -36,7 +36,7 @@ fi
 ./uesp-yuminstall "net-snmp-libs"
 ./uesp-yuminstall "net-snmp-utils"
 
-rpm -Uvh https://repo.zabbix.com/zabbix/7.0/alma/9/x86_64/zabbix-server-pgsql-7.0.24-release1.el9.x86_64.rpm
+rpm -Uvh https://repo.zabbix.com/zabbix/7.4/stable/alma/9/x86_64/zabbix-server-mysql-7.4.8-release1.el9.x86_64.rpm
 
 ./uesp-yuminstall zabbix-server-mysql
 ./uesp-yuminstall zabbix-web-mysql

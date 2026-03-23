@@ -10,7 +10,7 @@ UESP_HOSTNAME="$1"
 SERVERIP="$2"
 ZABBIXCONF="/etc/zabbix_agentd.conf"
 
-rpm -Uvh https://repo.zabbix.com/zabbix/7.0/alma/9/x86_64/zabbix-agent-7.0.24-release1.el9.x86_64.rpm
+rpm -Uvh https://repo.zabbix.com/zabbix/7.4/stable/alma/9/x86_64/zabbix-agent-7.4.8-release1.el9.x86_64.rpm
 
 # Does nothing in AlmaLinux 9
 # yum-config-manager --enable rhel-7-server-optional-rpms > /dev/null
