@@ -26,6 +26,8 @@ then
 	exit -6
 fi
 
+ln -sf /etc/zabbix_agentd.conf /etc/zabbix/zabbix_agentd.conf 
+
 sed -i "s/^Server=.*/Server=$SERVERIP/g" "$ZABBIXCONF"
 sed -i "s/^ServerActive=.*/ServerActive=$SERVERIP/g" "$ZABBIXCONF"
 sed -i "s/^Hostname=.*/Hostname=$UESP_HOSTNAME/g" "$ZABBIXCONF"
