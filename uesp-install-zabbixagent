@@ -10,7 +10,13 @@ UESP_HOSTNAME="$1"
 SERVERIP="$2"
 ZABBIXCONF="/etc/zabbix_agentd.conf"
 
-rpm -Uvh https://repo.zabbix.com/zabbix/7.4/stable/alma/9/x86_64/zabbix-agent-7.4.8-release1.el9.x86_64.rpm
+if ! grep -q "excludepkgs=zabbix" /etc/yum.repos.d/epel.repo; then
+	sed -i '/\[epel\]/a excludepkgs=zabbix*' /etc/yum.repos.d/epel.repo
+fi
+
+rpm -Uvh https://repo.zabbix.com/zabbix/7.4/release/rhel/9/noarch/zabbix-release-latest.el9.noarch.rpm
+
+dnf update
 
 # Does nothing in AlmaLinux 9
 # yum-config-manager --enable rhel-7-server-optional-rpms > /dev/null

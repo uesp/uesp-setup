@@ -36,7 +36,15 @@ fi
 ./uesp-yuminstall "net-snmp-libs"
 ./uesp-yuminstall "net-snmp-utils"
 
-rpm -Uvh https://repo.zabbix.com/zabbix/7.4/stable/alma/9/x86_64/zabbix-server-mysql-7.4.8-release1.el9.x86_64.rpm
+./uesp-yuminstall "java-11-openjdk-devel"
+
+if ! grep -q "excludepkgs=zabbix" /etc/yum.repos.d/epel.repo; then
+	sed -i '/\[epel\]/a excludepkgs=zabbix*' /etc/yum.repos.d/epel.repo
+fi
+
+rpm -Uvh https://repo.zabbix.com/zabbix/7.4/release/rhel/9/noarch/zabbix-release-latest.el9.noarch.rpm
+
+dnf update
 
 ./uesp-yuminstall zabbix-server-mysql
 ./uesp-yuminstall zabbix-web-mysql
