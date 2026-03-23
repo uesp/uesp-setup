@@ -4,6 +4,7 @@ echo "Starting uesp-install-lighttpd..."
 
 ./uesp-yuminstall "fail2ban"
 ./uesp-yuminstall "lighttpd"
+./uesp-yuminstall "lighttpd-fastcgi"
 
 mkdir -p /var/cache/lighttpd/compress
 
@@ -29,6 +30,30 @@ systemctl enable lighttpd
 if [ $? != 0 ]
 then
 	echo "     ERROR: Failed to update systemctl information for lighttpd!"
+	exit -8
+fi
+
+./uesp-yuminstall php
+./uesp-yuminstall php-cli
+./uesp-yuminstall php-common
+./uesp-yuminstall php-devel
+./uesp-yuminstall php-fpm
+./uesp-yuminstall php-gd
+./uesp-yuminstall php-mbstring
+./uesp-yuminstall php-mysqlnd
+./uesp-yuminstall php-pdo
+./uesp-yuminstall php-pear
+./uesp-yuminstall php-pecl-imagick
+./uesp-yuminstall php-pecl-zip
+./uesp-yuminstall php-process
+./uesp-yuminstall php-soap
+./uesp-yuminstall php-xml
+
+systemctl enable php-fpm
+
+if [ $? != 0 ]
+then
+	echo "     ERROR: Failed to update systemctl information for php-fpm!"
 	exit -8
 fi
 
