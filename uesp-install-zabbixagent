@@ -8,7 +8,7 @@ echo "Starting uesp-install-zabbixagent..."
 
 UESP_HOSTNAME="$1"
 SERVERIP="$2"
-ZABBIXCONF="/etc/zabbix_agent2.conf"
+ZABBIXCONF="/etc/zabbix/zabbix_agent2.conf"
 
 if ! grep -q "excludepkgs=zabbix" /etc/yum.repos.d/epel.repo; then
 	sed -i '/\[epel\]/a excludepkgs=zabbix*' /etc/yum.repos.d/epel.repo
