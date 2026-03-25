@@ -8,7 +8,7 @@ echo "Starting uesp-install-zabbixagent..."
 
 UESP_HOSTNAME="$1"
 SERVERIP="$2"
-ZABBIXCONF="/etc/zabbix_agentd.conf"
+ZABBIXCONF="/etc/zabbix_agent2.conf"
 
 if ! grep -q "excludepkgs=zabbix" /etc/yum.repos.d/epel.repo; then
 	sed -i '/\[epel\]/a excludepkgs=zabbix*' /etc/yum.repos.d/epel.repo
@@ -21,9 +21,9 @@ dnf update
 # Does nothing in AlmaLinux 9
 # yum-config-manager --enable rhel-7-server-optional-rpms > /dev/null
 
-./uesp-yuminstall zabbix-agent
+./uesp-yuminstall zabbix-agent2
 
-systemctl enable zabbix-agent
+systemctl enable zabbix-agent2
 RESULT=$?
 
 if [ $RESULT != 0 ]
@@ -32,14 +32,12 @@ then
 	exit -6
 fi
 
-ln -sf /etc/zabbix_agentd.conf /etc/zabbix/zabbix_agentd.conf 
-
 sed -i "s/^Server=.*/Server=$SERVERIP/g" "$ZABBIXCONF"
 sed -i "s/^ServerActive=.*/ServerActive=$SERVERIP/g" "$ZABBIXCONF"
 sed -i "s/^Hostname=.*/Hostname=$UESP_HOSTNAME/g" "$ZABBIXCONF"
 
-service zabbix-agent restart
+service zabbix-agent2 restart
 
-# sed -i "s/Server=(.*)/Server=10.12.222.25/g" "/etc/zabbix/zabbix_agentd.conf"
+# sed -i "s/Server=(.*)/Server=10.12.222.25/g" "/etc/zabbix/zabbix_agent2.conf"
 
 echo "     OK: Successfully installed the Zabbix agent!"

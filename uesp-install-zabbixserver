@@ -48,6 +48,8 @@ dnf update
 
 ./uesp-yuminstall zabbix-server-mysql
 ./uesp-yuminstall zabbix-web-mysql
+./uesp-yuminstall zabbix-apache-conf
+./uesp-yuminstall zabbix-sql-scripts
 
 systemctl enable zabbix-server
 # service zabbix-server restart
