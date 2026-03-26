@@ -6,8 +6,11 @@
 mkdir -p /home/backup
 chown backup:uespadmin /home/backup
 
+mkdir -p /home/fallout
+chown fallout:uespadmin /home/fallout
+
 mkdir -p /home/falloutde
-chown fallout /home/backup
+chown fallout:uespadmin /home/falloutde
 
 mkdir -p /home/twelveworlds
 chown uesp /home/twelveworlds
@@ -30,8 +33,8 @@ chmod g+rwx,a+rx /home/zabbix
 
 chown uespadmin /home/beyondskyrim
 chown uespadmin /home/dave
-chown uespadmin /home/fallout
-chown uespadmin /home/falloutde
-chown uespadmin /home/sfwiki
-chown uespadmin /home/twelveworlds
-chown uespadmin /home/uesp
+chown fallout:uespadmin /home/fallout
+chown fallout:uespadmin /home/falloutde
+chown sfwiki:uespadmin /home/sfwiki
+chown uespadmin:uespadmin /home/twelveworlds
+chown uesp:uespadmin /home/uesp
